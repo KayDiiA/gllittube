@@ -1,0 +1,27 @@
+body {
+  background-image: url("background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+header img {
+  width: 150px; /* Adjust the size as needed */
+  height: auto; /* Maintain the aspect ratio */
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline;
+}
+
+nav ul li a {
+  padding: 10px;
+  text-decoration: none;
+}
+
+nav ul li a:hover {
