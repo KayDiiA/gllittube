@@ -3,7 +3,6 @@
 <head>
   <title>Borderless RP</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
     /* Set full-screen background */
     body {
@@ -14,14 +13,14 @@
       background-position: center;
       background-repeat: no-repeat;
       height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     /* Center the logo */
     .logo {
-      position: absolute;
-      top: 23%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      text-align: center;
     }
     
     /* Customize the logo style */
@@ -32,7 +31,8 @@
     
     /* Button styles */
     .button {
-      display: inline-block;
+      display: block;
+      margin-bottom: 10px;
       padding: 10px 20px;
       background-color: #f44336;
       color: white;
