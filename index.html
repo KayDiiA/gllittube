@@ -17,21 +17,16 @@
     
     /* Center the logo */
     .logo-container {
-      display: flex;
-      align-items: top-center;
-      justify-content: center;
-      height: 100vh;
+      text-align: center;
+      padding-top: 20px;
     }
     
     /* Customize the logo style */
     .logo {
-      text-align: top-center;
-    }
-    
-    /* Customize the logo image */
-    .logo img {
-      width: 793px;
-      height: 180px;
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
     }
     
     /* Button container */
@@ -42,8 +37,8 @@
     
     /* Button styles */
     .button {
-      display: inline-block;
-      margin: 0 5px;
+      display: block;
+      margin: 10px auto;
       padding: 10px 20px;
       background-color: #f44336;
       color: white;
@@ -53,6 +48,7 @@
       font-size: 16px;
       cursor: pointer;
       border-radius: 4px;
+      width: 150px;
     }
     
     /* Button icon styles */
@@ -68,13 +64,11 @@
 </head>
 <body>
   <div class="logo-container">
-    <div class="logo">
-      <img src="colorlogo.png" alt="Logo">
-    </div>
-    <div class="button-container">
-      <a href="#" class="button"><i class="fas fa-link"></i>Connect</a>
-      <a href="#" class="button connect-button"><i class="fab fa-discord"></i>Discord</a>
-    </div>
+    <img class="logo" src="colorlogo.png" alt="Logo">
+  </div>
+  <div class="button-container">
+    <a href="#" class="button"><i class="fas fa-link"></i>Connect</a>
+    <a href="#" class="button connect-button"><i class="fab fa-discord"></i>Discord</a>
   </div>
 </body>
 </html>
