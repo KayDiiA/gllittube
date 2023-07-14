@@ -2,8 +2,8 @@
 <html>
 <head>
   <title>Borderless RP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-
   <style>
     /* Set full-screen background */
     body {
@@ -19,7 +19,7 @@
     /* Center the logo */
     .logo {
       position: absolute;
-      top: 20%;
+      top: 23%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
@@ -29,11 +29,39 @@
       width: 793px;
       height: 180px;
     }
+    
+    /* Button styles */
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    /* Button icon styles */
+    .button i {
+      margin-right: 5px;
+    }
+    
+    /* Customize the Connect button */
+    .connect-button {
+      background-color: #4CAF50;
+    }
   </style>
 </head>
 <body>
   <div class="logo">
-    <img src="colorlogo.png" alt="Logo">
+    <img src="logo.png" alt="Logo">
+    <div>
+      <a href="#" class="button"><i class="fas fa-link"></i>Connect</a>
+      <a href="#" class="button connect-button"><i class="fab fa-discord"></i>Discord</a>
+    </div>
   </div>
 </body>
 </html>
