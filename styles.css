@@ -25,3 +25,17 @@ nav ul li a {
 }
 
 nav ul li a:hover {
+
+}
+
+.button {
+  background-color: #4CAF50; /* Set the background color */
+  color: white; /* Set the text color */
+  padding: 10px 20px; /* Adjust the padding as needed */
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button:hover {
+  background-color: #45a049; /* Set the background color on hover */
+}
