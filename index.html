@@ -13,26 +13,37 @@
       background-position: center;
       background-repeat: no-repeat;
       height: 100vh;
-      display: flex;
-      align-items: top-center;
-      justify-content: center;
     }
     
     /* Center the logo */
-    .logo {
-      text-align: center;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
     
     /* Customize the logo style */
+    .logo {
+      text-align: top-center;
+    }
+    
+    /* Customize the logo image */
     .logo img {
       width: 793px;
       height: 180px;
     }
     
+    /* Button container */
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
     /* Button styles */
     .button {
-      display: block;
-      margin-bottom: 10px;
+      display: inline-block;
+      margin: 0 5px;
       padding: 10px 20px;
       background-color: #f44336;
       color: white;
@@ -56,9 +67,11 @@
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="colorlogo.png" alt="Logo">
-    <div>
+  <div class="logo-container">
+    <div class="logo">
+      <img src="colorlogo.png" alt="Logo">
+    </div>
+    <div class="button-container">
       <a href="#" class="button"><i class="fas fa-link"></i>Connect</a>
       <a href="#" class="button connect-button"><i class="fab fa-discord"></i>Discord</a>
     </div>
