@@ -1,76 +1,444 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Borderless RP</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <style>
-    /* Set full-screen background */
-    body {
-      margin: 0;
-      padding: 0;
-      background-image: url('planet.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-    }
-    
-    /* Logo container */
-    .logo-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-    
-    /* Customize the logo style */
-    .logo {
-      max-width: 55%;
-      height: auto;
-    }
-    
-    /* Button container */
-    .button-container {
-      text-align: center;
-      margin-top: 180px;
-    }
-    
-    /* Button styles */
-    .button {
-      display: inline-block;
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #9656ce; 
-      color: white;
-      border: none;
-      text-align: center;
-      text-decoration: none;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      width: 150px;
-    }
-    
-    /* Button icon styles */
-    .button i {
-      margin-right: 5px;
-    }
-    
-    /* Customize the Connect button */
-    .connect-button {
-      background-color: ##44C640;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLLITTUBE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #181818;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        #playlist-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #playlist-buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #ff77c6;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #playlist-buttons button:hover {
+            background-color: #ff52b7;
+        }
+        #playlist-buttons button.active {
+            background-color: #ff52b7;
+        }
+        #reverse-btn {
+            padding: 10px 20px;
+            background-color: #ff77c6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #reverse-btn:hover {
+            background-color: #ff52b7;
+        }
+        #video-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .video {
+            background-color: #202020;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .video:hover {
+            transform: scale(1.05);
+        }
+        .video-thumbnail {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        h3 {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #fff;
+        }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.show {
+            display: block;
+            opacity: 1;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 90%;
+            max-width: 800px;
+            transform: translate(-50%, -50%);
+            background-color: #181818;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            
+        }
+        #video-frame-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* Maintain 16:9 aspect ratio */
+        }
+        #video-frame-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        /* Logo styling */
+        #logo-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        #site-logo {
+            width: 200px; /* Adjust width as needed */
+            height: auto;
+            max-width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            
+        }
+        #site-logo:hover {
+            transform: scale(1.05); /* Slight zoom on hover */
+        }
+        #video-warning {
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Close button */
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close:hover {
+            color: #ff4c91;
+        }
+    </style>
 </head>
 <body>
-  <div class="logo-container">
-    <img class="logo" src="colorlogo.png" alt="Logo">
-  </div>
-  <div class="button-container">
-    <a href="https://cfx.re/join/oyk49x" class="button"><i class="fas fa-link"></i>Connect</a>
-    <a href="https://discord.gg/ZbHMweDBCG" class="button connect-button"><i class="fab fa-discord"></i>Discord</a>
-  </div>
+    <!-- Logo Container -->
+    <div id="logo-container">
+        <img src="gllittube.png" alt="Site Logo" id="site-logo" />
+    </div>
+
+
+    <!-- Playlist Buttons -->
+    <div id="playlist-buttons">
+        <!-- Buttons will be dynamically added here -->
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search videos by title or tag..."
+          style="padding: 10px; width: 80%; max-width: 400px; border-radius: 5px; border: none;"
+          oninput="filterVideos()"
+        />
+      </div>
+      
+
+    <!-- Reverse Order Button -->
+    <div style="text-align: center; margin-top: 20px;">
+        <button id="reverse-btn" onclick="reverseOrder()">New - Old</button>
+    </div>
+
+    <!-- Video Container -->
+    <div id="video-container"></div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" style="display: none;">Loading...</div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          
+         
+          <div id="video-frame-container"></div>
+      
+    
+          <p id="video-warning">
+            If the video says unavailable, the channel it is uploaded to does not allow embedding, the video must be watched on Youtube.</p>
+        </div>
+      </div>
+
+    <script>
+         const API_KEY = 'AIzaSyBvMFFCIzxQ1hzaJHrEgXBKDY7zg0MQv9s'; 
+
+       
+        const playlists = [
+            { name: 'All Variety', id: 'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih' },  
+            { name: 'Super ILLIT', id: 'PLr-TseZWHDKkf9F59CdpvT2Zbj-vCwNQg' }, 
+            { name: 'Behind-It', id: 'PLr-TseZWHDKk2YN6b7nHzUpkReQDhS-Xw' }, 
+            { name: 'ILLIT On-Air', id: 'PLr-TseZWHDKmtATvbZQwVdoiDaKozx5EK' } 
+            
+        ];
+
+        let currentPlaylistId = playlists[0].id; 
+        let allVideos = [];
+        let reversed = false;
+
+      
+        function generatePlaylistButtons() {
+            const container = document.getElementById('playlist-buttons');
+            playlists.forEach((playlist, index) => {
+                const button = document.createElement('button');
+                button.innerText = playlist.name;
+                button.onclick = () => changePlaylist(playlist.id, index);
+                button.classList.add('playlist-btn');
+                button.setAttribute('data-index', index);
+                container.appendChild(button);
+            });
+         
+            setActiveButton(0);
+        }
+
+         async function fetchAllVideos() {
+            let allItems = [];
+            let pageToken = '';
+            do {
+                const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${currentPlaylistId}&key=${API_KEY}&pageToken=${pageToken}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                allItems = allItems.concat(data.items);
+                pageToken = data.nextPageToken || '';
+            } while (pageToken);
+
+          
+            const videoIds = allItems.map(item => item.snippet.resourceId.videoId);
+            const videoMeta = await fetchVideoTags(videoIds);
+
+            
+            allItems.forEach(item => {
+                const vid = item.snippet.resourceId.videoId;
+                item.tags = videoMeta[vid] || []; 
+            });
+
+            return allItems;
+        }
+
+        async function fetchVideoTags(videoIds) {
+            const tagsMap = {};
+            const chunkSize = 50;
+
+            for (let i = 0; i < videoIds.length; i += chunkSize) {
+                const chunk = videoIds.slice(i, i + chunkSize).join(',');
+                const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${chunk}&key=${API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                data.items.forEach(video => {
+                    tagsMap[video.id] = video.snippet.tags || [];
+                });
+            }
+
+            return tagsMap;
+        }
+
+
+
+    
+        async function loadVideos() {
+            document.getElementById('loading').style.display = 'block';
+            allVideos = await fetchAllVideos();
+            document.getElementById('loading').style.display = 'none';
+            displayVideos(); 
+        }
+
+        const reverseByDefault = [
+            'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih' 
+        ];
+
+ 
+    function displayVideos() {
+        const container = document.getElementById('video-container');
+        container.innerHTML = ''; 
+
+       
+        let videosToDisplay = [...allVideos]; 
+
+        if (reverseByDefault.includes(currentPlaylistId)) {
+            console.log(`Reversing playlist: ${currentPlaylistId}`);
+            videosToDisplay.reverse();
+            reversed = true; 
+        } else {
+            reversed = false; 
+        }
+
+        videosToDisplay.forEach(item => {
+            const videoId = item.snippet.resourceId.videoId;
+            const title = item.snippet.title;
+            const thumbnailUrl = item.snippet.thumbnails.medium.url;
+
+            const videoElement = document.createElement('div');
+            videoElement.className = 'video';
+            videoElement.setAttribute('data-video-id', videoId);
+            videoElement.setAttribute('data-title', title);
+
+            videoElement.innerHTML = `
+                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
+                <h3>${title}</h3>
+            `;
+
+       
+            videoElement.addEventListener('click', () => loadVideo(videoId));
+            container.appendChild(videoElement);
+        });
+
+    
+    }
+
+            function filterVideos() {
+            const query = document.getElementById("search-input").value.toLowerCase();
+            const container = document.getElementById("video-container");
+            container.innerHTML = '';
+
+            let filtered = allVideos.filter(item => {
+                const title = item.snippet.title.toLowerCase();
+                const tags = (item.tags || []).map(tag => tag.toLowerCase());
+                return title.includes(query) || tags.some(tag => tag.includes(query));
+            });
+
+            if (reversed) filtered = filtered.reverse();
+
+            filtered.forEach(item => {
+                const videoId = item.snippet.resourceId.videoId;
+                const title = item.snippet.title;
+                const thumbnailUrl = item.snippet.thumbnails.medium.url;
+
+                const videoElement = document.createElement('div');
+                videoElement.className = 'video';
+                videoElement.setAttribute('data-video-id', videoId);
+                videoElement.setAttribute('data-title', title);
+
+                videoElement.innerHTML = `
+                    <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
+                    <h3>${title}</h3>
+                `;
+
+                videoElement.addEventListener('click', () => loadVideo(videoId));
+                container.appendChild(videoElement);
+            });
+        }
+
+
+     
+
+     
+        function loadVideo(videoId) {
+            const modal = document.getElementById('video-modal');
+            const container = document.getElementById('video-frame-container');
+
+         
+            container.innerHTML = `
+                <iframe
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                    frameborder="0"
+                    allowfullscreen
+                ></iframe>
+            `;
+
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('video-modal');
+            const container = document.getElementById('video-frame-container');
+
+        
+            container.innerHTML = '';
+            modal.classList.remove('show');
+        }
+
+    
+        window.onclick = function (event) {
+            const modal = document.getElementById('video-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+      
+        function reverseOrder() {
+            const container = document.getElementById('video-container');
+            const videos = Array.from(container.children);
+            container.innerHTML = ''; 
+
+         
+            videos.reverse().forEach(video => container.appendChild(video));
+
+            reversed = !reversed;
+        }
+
+      
+        function changePlaylist(newPlaylistId, index) {
+            currentPlaylistId = newPlaylistId;
+            reversed = false; 
+            loadVideos();
+            setActiveButton(index);
+        }
+
+       
+        function setActiveButton(index) {
+            document.querySelectorAll('.playlist-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-index="${index}"]`).classList.add('active');
+        }
+
+      
+        generatePlaylistButtons();
+        loadVideos();
+    </script>
 </body>
 </html>
