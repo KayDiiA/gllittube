@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLLIT TUBE</title>
+    <title>GLLITTUBE</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -162,6 +162,29 @@
             }
 
 
+            #top-link {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+            }
+
+            #top-link a {
+                background-color: #ff77c6;
+                color: white;
+                text-decoration: none;
+                padding: 8px 16px;
+                border-radius: 5px;
+                font-size: 14px;
+                transition: background-color 0.2s ease-in-out;
+            }
+
+            #top-link a:hover {
+                background-color: #ff52b7;
+            }
+
+
+
         /* Close button */
         .close {
             position: absolute;
@@ -198,7 +221,10 @@
         />
       </div>
       
-
+      <div id="top-link">
+        <a href="https://illitville.com" target="_blank">Check out ILLITville</a>
+      </div>
+      
     <!-- Reverse Order Button -->
     <div style="text-align: center; margin-top: 20px;">
         <button id="reverse-btn" onclick="reverseOrder()">Sort</button>
