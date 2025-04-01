@@ -24,6 +24,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-family: 'berk', sans-serif;
         }
         #playlist-buttons button:hover {
             background-color: #ff52b7;
@@ -39,6 +40,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+            font-family: 'berk', sans-serif;
         }
         #reverse-btn:hover {
             background-color: #ff52b7;
@@ -148,7 +150,16 @@
             margin-top: 4px;
             text-align: center;
             font-style: italic;
+            font-family: 'berk', sans-serif;
         }
+        
+
+        @font-face {
+            font-family: 'berk';
+            src: url('fonts/kkberkbm.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            }
 
 
         /* Close button */
@@ -181,7 +192,7 @@
         <input
           type="text"
           id="search-input"
-          placeholder="Search videos by title or tag..."
+          placeholder="Search videos by title or tag... (Current Playlist)"
           style="padding: 10px; width: 80%; max-width: 400px; border-radius: 5px; border: none;"
           oninput="filterVideos()"
         />
@@ -190,7 +201,7 @@
 
     <!-- Reverse Order Button -->
     <div style="text-align: center; margin-top: 20px;">
-        <button id="reverse-btn" onclick="reverseOrder()">New - Old</button>
+        <button id="reverse-btn" onclick="reverseOrder()">Sort</button>
     </div>
 
     <!-- Video Container -->
@@ -221,8 +232,16 @@
             { name: 'All Variety', id: 'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih' },  
             { name: 'Super ILLIT', id: 'PLr-TseZWHDKkf9F59CdpvT2Zbj-vCwNQg' }, 
             { name: 'Behind-It', id: 'PLr-TseZWHDKk2YN6b7nHzUpkReQDhS-Xw' }, 
-            { name: 'ILLIT On-Air', id: 'PLr-TseZWHDKmtATvbZQwVdoiDaKozx5EK' } 
-            
+            { name: 'ILLIT On-Air', id: 'PLr-TseZWHDKmtATvbZQwVdoiDaKozx5EK' }, 
+            { name: 'Minju\'s Pink Cabinet', id: 'PLkYAFN95Zse9tmkzv4PXOfGucbF1_vXQ3' },
+            { name: 'Night Of ILLIT', id: 'PLr-TseZWHDKl0kFGW5RS5W0eWj38Ut1wQ' },
+            { name: 'Super Real ILLIT', id: 'PLr-TseZWHDKkW2zufgb85THhTdNO4fxCI' },
+            { name: 'Beside-It', id: 'PLr-TseZWHDKmJ3tAXRWCZvXXq5DppUguz' },
+            { name: 'I\'ll Like It', id: 'PLr-TseZWHDKk_ZQVcjKZtuvwmukFCBRVi' },
+            { name: 'ILLIT Ready', id: 'PLr-TseZWHDKm0tyqvhSo_tDfNezNoBUTj' },
+            { name: 'Log-It', id: 'PLr-TseZWHDKmYNhB5qsaxPZKhhjL3qakl' },
+            { name: '10 Minute Debate', id: 'PLr-TseZWHDKnRRStlMrskwNNaCHcBZMqZ' },
+            { name: 'Introduce ILLIT', id: 'PLr-TseZWHDKkzkTNLxlB_GfGxsoyO41TU' },
         ];
 
         let currentPlaylistId = playlists[0].id; 
