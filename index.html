@@ -411,6 +411,32 @@
         border-radius: 2px;
         }
 
+        #site-footer {
+        text-align: center;
+        font-size: 12px;
+        color: #aaa;
+        margin: 40px 20px 20px;
+        font-family: 'berk', sans-serif;
+        }
+
+        #site-footer a {
+        color: #ffccff;
+        text-decoration: underline;
+        }
+
+        body.light #site-footer {
+        color: #333;
+        }
+
+        body.light #site-footer a {
+        color: #b64da2;
+        }
+
+        body.light #cache-status {
+        color: #999;
+        }
+
+
 
 
         
@@ -490,6 +516,18 @@
         </div>
       </div>
 
+      <div id="cache-status" style="text-align: center; font-size: 11px; color: #666; margin-bottom: 10px; font-family: 'berk', sans-serif;"></div>
+
+      <footer id="site-footer">
+        <p>
+          All videos are embedded from YouTube.<br />
+          Content belongs to their respective owners.<br />
+          Powered by the <a href="https://developers.google.com/youtube/" target="_blank">YouTube API</a>.
+        </p>
+      </footer>
+
+      
+
     <script>
          const API_KEY = 'AIzaSyBvMFFCIzxQ1hzaJHrEgXBKDY7zg0MQv9s'; 
 
@@ -520,6 +558,39 @@
         let viewingFavorites = false;
         let allPlaylistsVideos = [];
         let inSearchMode = false;
+
+        function getCachedData(key) {
+        const data = localStorage.getItem(key);
+        if (!data) return null;
+
+        try {
+            const { timestamp, payload } = JSON.parse(data);
+            const age = Date.now() - timestamp;
+
+            if (age < 1000 * 60 * 60 * 6) {
+            showCacheStatus("📦 Using cached data");
+            return payload;
+            } else {
+            localStorage.removeItem(key);
+            }
+        } catch {
+            localStorage.removeItem(key);
+        }
+
+        return null;
+        }
+
+        function setCachedData(key, payload) {
+        showCacheStatus("🌐 Fetched fresh data");
+        localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), payload }));
+        }
+
+        function showCacheStatus(message) {
+        const el = document.getElementById("cache-status");
+        if (el) el.textContent = message;
+        }
+
+
 
 
 
@@ -595,9 +666,37 @@
         }
 
         async function fetchAllVideosFrom(playlistId) {
+            const cacheKey = `playlistData_${playlistId}`;
+            const cached = localStorage.getItem(cacheKey);
+
+            let cachedCount = 0;
+
+            if (cached) {
+                try {
+                const parsed = JSON.parse(cached);
+                cachedCount = parsed.payload.length;
+                const age = Date.now() - parsed.timestamp;
+
+                if (age < 1000 * 60 * 60 * 6) {
+                   
+                    const countCheckURL = `https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`;
+                    const response = await fetch(countCheckURL);
+                    const data = await response.json();
+                    const itemCount = data?.items?.[0]?.contentDetails?.itemCount || 0;
+
+                    if (itemCount === cachedCount) {
+                    showCacheStatus("📦 Using cached data");
+                    return parsed.payload;
+                    }
+                }
+                } catch {
+                localStorage.removeItem(cacheKey);
+                }
+            }
+
+            // 🔄 Fetch full list fresh
             let allItems = [];
             let pageToken = '';
-
             do {
                 const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`;
                 const response = await fetch(url);
@@ -612,13 +711,22 @@
             allItems.forEach(item => {
                 const vid = item.snippet.resourceId.videoId;
                 const meta = videoMeta[vid] || { tags: [], title: item.snippet.title };
-
                 item.tags = meta.tags;
                 item.snippet.title = meta.title;
             });
 
+            // 💾 Save to cache
+            localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                payload: allItems
+            }));
+
+            showCacheStatus("🌐 Fetched fresh data");
             return allItems;
-         }
+}
+
+
+
 
 
     
