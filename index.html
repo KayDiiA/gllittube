@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLLIT TUBE</title>
+    <title>GLLITTUBE</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,15 +48,24 @@
         #video-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            justify-content: center; /* ✅ Center the grid itself */
             gap: 20px;
             padding: 20px;
         }
+
         .video {
             background-color: #202020;
             padding: 10px;
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            max-width: 360px; 
+            width: 100%;
+            margin: 0 auto;
         }
         .video:hover {
             transform: scale(1.05);
@@ -212,14 +221,109 @@
         .close:hover {
             color: #ff4c91;
         }
+
+        body.light {
+        background-color: #CB9DF0;
+        color: #111;
+        }
+
+        body.light .video {
+        background-color: #FDDBBB;
+        }
+
+        body.light h3 {
+        color: #111;
+        }
+
+        body.light #playlist-buttons button,
+        body.light #reverse-btn,
+        body.light #top-link a,
+        body.light #theme-toggle {
+        background-color: #F0C1E1;
+        color: white;
+        }
+
+        body.light #playlist-buttons button:hover,
+        body.light #reverse-btn:hover,
+        body.light #top-link a:hover,
+        body.light #theme-toggle:hover {
+        background-color: #FDDBBB;
+        }
+
+        body.dark {
+        background-color: #181818;
+        color: #fff;
+        }
+
+        body.dark .video {
+        background-color: #202020;
+        }
+
+        body.dark h3 {
+        color: #fff;
+        }
+
+        body.dark #playlist-buttons button,
+        body.dark #reverse-btn,
+        body.dark #top-link a,
+        body.dark #theme-toggle {
+        background-color: #ff77c6;
+        color: white;
+        }
+
+        body.dark #playlist-buttons button:hover,
+        body.dark #reverse-btn:hover,
+        body.dark #top-link a:hover,
+        body.dark #theme-toggle:hover {
+        background-color: #ff52b7;
+        }
+
+        #splash-text {
+            font-family: 'berk', sans-serif;
+            font-size: 16px;
+            color: #ffccff;
+            text-align: center;
+            margin-top: 5px;
+            animation: splashIn 2s ease-in-out infinite;
+        }
+
+        @keyframes splashIn {
+            0% {
+                opacity: 1;
+                transform: scale(0.95) rotate(-2deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05) rotate(2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(0.95) rotate(-2deg);
+            }
+        }
+
+
+
+
+        
     </style>
 </head>
 <body>
     <link rel="icon" type="image/png" href="favicon.png" />
     <div id="logo-container">
-        <img src="gllittube.png" alt="Site Logo" id="site-logo" />
+        <img 
+        src="gllittube.png" 
+        alt="Site Logo" 
+        id="site-logo"
+        data-dark="gllittube.png"
+        data-light="gllittube-light.png"
+        />
+
         <p id="logo-caption">Created by u\BigGamingGamer0 (Kay)</p>
       </div>
+
+      <p id="splash-text">✨ Loading magic...</p>
+
 
     <!-- Playlist Buttons -->
     <div id="playlist-buttons">
@@ -238,7 +342,12 @@
       
       <div id="top-link">
         <a href="https://illitville.com" target="_blank">Check out ILLITville</a>
+        
       </div>
+      <div id="theme-toggle-container" style="text-align: center; margin-top: 10px;">
+        <button id="theme-toggle">🌙 Dark Mode</button>
+      </div>
+      
       
     <!-- Reverse Order Button -->
     <div style="text-align: center; margin-top: 20px;">
@@ -322,8 +431,12 @@
             
             allItems.forEach(item => {
                 const vid = item.snippet.resourceId.videoId;
-                item.tags = videoMeta[vid] || []; 
+                const meta = videoMeta[vid] || { tags: [], title: item.snippet.title };
+
+                item.tags = meta.tags;
+                item.snippet.title = meta.title; // ✅ override with English title if available
             });
+
 
             return allItems;
         }
@@ -334,12 +447,19 @@
 
             for (let i = 0; i < videoIds.length; i += chunkSize) {
                 const chunk = videoIds.slice(i, i + chunkSize).join(',');
-                const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${chunk}&key=${API_KEY}`;
+                const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,localizations&id=${chunk}&key=${API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 data.items.forEach(video => {
-                    tagsMap[video.id] = video.snippet.tags || [];
+                    const videoId = video.id;
+                    const tags = video.snippet.tags || [];
+                    const localizedTitle = video.localizations?.en?.title || video.snippet.title;
+
+                    tagsMap[videoId] = {
+                        tags: tags,
+                        title: localizedTitle
+                    };
                 });
             }
 
@@ -495,6 +615,30 @@
             setActiveButton(index);
         }
 
+        // 🌗 Dark/Light mode toggle
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.add(savedTheme);
+            updateThemeButtonText(savedTheme);
+
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+            const current = document.body.classList.contains('light') ? 'light' : 'dark';
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            document.body.classList.remove(current);
+            document.body.classList.add(newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButtonText(newTheme);
+        });
+
+        function updateThemeButtonText(theme) {
+            const toggleBtn = document.getElementById('theme-toggle');
+            toggleBtn.innerText = theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+
+            const logo = document.getElementById('site-logo');
+            const newLogoSrc = theme === 'light' ? logo.dataset.light : logo.dataset.dark;
+            logo.src = newLogoSrc;
+        }
+
+
        
         function setActiveButton(index) {
             document.querySelectorAll('.playlist-btn').forEach(btn => {
@@ -506,6 +650,49 @@
       
         generatePlaylistButtons();
         loadVideos();
+
+        const splashMessages = [
+        "✨Sparkling like glitter!✨",
+        "Now with 200% more pink!",
+        "Kay was here 💕",
+        "You clicked that, didn’t you?",
+        "This time I want...",
+        "Powered by ILLIT energy ✨",
+        "Hand-coded with heart ❤️",
+        "You're a lucky girl!",
+        "Life is like a box of Almond Chocolates 🍫",
+        "Join r/ILLIT today!"
+        ];
+
+        // 🎉 Splash overrides for special days
+        const splashOverrides = {
+        "12-25": "Merry Christmas! 🎄",
+        "10-31": "Spooky season is here! 🎃",
+        "02-14": "Happy Valentine's Day 💘",
+        "01-15": "Happy Birthday Yunah! 🎂", 
+        "05-11": "Happy Birthday Minju! 🎂", 
+        "10-08": "Happy Birthday Moka! 🎂", 
+        "06-26": "Happy Birthday Wonhee! 🎂", 
+        "02-04": "Happy Birthday Iroha! 🎂", 
+       // "04-01": "April Fools! 🤡", 
+        };
+
+        function getTodayKey() {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // 0-indexed
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${month}-${day}`;
+        }
+
+        const splash = document.getElementById('splash-text');
+        const todayKey = getTodayKey();
+
+        if (splashOverrides[todayKey]) {
+        splash.textContent = splashOverrides[todayKey];
+        } else {
+        const randomSplash = splashMessages[Math.floor(Math.random() * splashMessages.length)];
+        splash.textContent = randomSplash;
+        }
     </script>
 </body>
 </html>
