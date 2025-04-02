@@ -555,6 +555,8 @@
         let allVideos = [];
         let reversed = false;
 
+        let apiQueryCount = 0;
+
         let viewingFavorites = false;
         let allPlaylistsVideos = [];
         let inSearchMode = false;
@@ -647,6 +649,7 @@
             for (let i = 0; i < videoIds.length; i += chunkSize) {
                 const chunk = videoIds.slice(i, i + chunkSize).join(',');
                 const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,localizations&id=${chunk}&key=${API_KEY}`;
+                logAPIQuery(url);
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -680,6 +683,7 @@
                 if (age < 1000 * 60 * 60 * 6) {
                    
                     const countCheckURL = `https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`;
+                    logAPIQuery(countCheckURL);
                     const response = await fetch(countCheckURL);
                     const data = await response.json();
                     const itemCount = data?.items?.[0]?.contentDetails?.itemCount || 0;
@@ -699,6 +703,7 @@
             let pageToken = '';
             do {
                 const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`;
+                logAPIQuery(url);
                 const response = await fetch(url);
                 const data = await response.json();
                 allItems = allItems.concat(data.items);
@@ -735,6 +740,7 @@
             allVideos = await fetchAllVideos();
             document.getElementById('loading').style.display = 'none';
             displayVideos(); 
+            console.log(`📊 Total API queries this session: ${apiQueryCount}`);
         }
 
         const reverseByDefault = [
@@ -1164,7 +1170,13 @@
                 videoElement.addEventListener('click', () => loadVideo(videoId));
                 container.appendChild(videoElement);
             });
-            }
+        }
+
+        function logAPIQuery(url) {
+            apiQueryCount++;
+            console.log(`🔎 [API #${apiQueryCount}] ${url}`);
+         }
+
 
 
     </script>
