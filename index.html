@@ -368,6 +368,51 @@
         }
         }
 
+        .fav-btn {
+        margin-top: 6px;
+        background-color: #ffccff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-family: 'berk', sans-serif;
+        }
+
+        body.light .fav-btn {
+        background-color: #ffcce6;
+        }
+
+        #favorites-btn {
+        padding: 10px 20px;
+        background-color: #ff77c6;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-family: 'berk', sans-serif;
+        margin-left: 10px;
+        }
+        #favorites-btn:hover {
+        background-color: #ff52b7;
+        }
+
+        body.light #favorites-btn {
+        background-color: #F0C1E1;
+        }
+        body.light #favorites-btn:hover {
+        background-color: #FDDBBB;
+        }
+
+        mark {
+        background-color: #B3EBF2;
+        padding: 0 2px;
+        border-radius: 2px;
+        }
+
+
+
         
     </style>
 </head>
@@ -403,7 +448,7 @@
         <input
           type="text"
           id="search-input"
-          placeholder="Search videos by title or tag... (Current Playlist)"
+          placeholder="Search videos by title or tag..."
           style="padding: 10px; width: 80%; max-width: 400px; border-radius: 5px; border: none;"
           oninput="filterVideos()"
         />
@@ -418,11 +463,13 @@
       </div>
       
       
-    <!-- Reverse Order Button -->
-    <div style="text-align: center; margin-top: 20px;">
+  
+      <div style="text-align: center; margin-top: 20px;">
         <button id="reverse-btn" onclick="reverseOrder()">Sort</button>
-    </div>
-
+        <button id="favorites-btn" onclick="showFavorites()">⭐ Favorites</button>
+      </div>
+      
+      
     <!-- Video Container -->
     <div id="video-container"></div>
 
@@ -470,7 +517,12 @@
         let allVideos = [];
         let reversed = false;
 
-      
+        let viewingFavorites = false;
+        let allPlaylistsVideos = [];
+        let inSearchMode = false;
+
+
+
         function generatePlaylistButtons() {
             const container = document.getElementById('playlist-buttons');
             playlists.forEach((playlist, index) => {
@@ -485,32 +537,36 @@
             setActiveButton(0);
         }
 
-         async function fetchAllVideos() {
-            let allItems = [];
-            let pageToken = '';
-            do {
-                const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${currentPlaylistId}&key=${API_KEY}&pageToken=${pageToken}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                allItems = allItems.concat(data.items);
-                pageToken = data.nextPageToken || '';
-            } while (pageToken);
+        async function preloadAllVideos() {
+            let merged = [];
 
-          
-            const videoIds = allItems.map(item => item.snippet.resourceId.videoId);
-            const videoMeta = await fetchVideoTags(videoIds);
+            for (const playlist of playlists) {
+                if (playlist.id === currentPlaylistId) continue; // ✅ Skip currently loaded playlist
 
-            
-            allItems.forEach(item => {
-                const vid = item.snippet.resourceId.videoId;
-                const meta = videoMeta[vid] || { tags: [], title: item.snippet.title };
+                const items = await fetchAllVideosFrom(playlist.id);
+                merged = merged.concat(items);
+            }
 
-                item.tags = meta.tags;
-                item.snippet.title = meta.title; // ✅ override with English title if available
+            // Also include already-loaded videos
+            merged = merged.concat(allVideos);
+
+            // ✅ Deduplicate
+            const uniqueMap = new Map();
+            merged.forEach(item => {
+                const id = item.snippet.resourceId.videoId;
+                if (!uniqueMap.has(id)) {
+                uniqueMap.set(id, item);
+                }
             });
 
+            allPlaylistsVideos = Array.from(uniqueMap.values());
+         }
 
-            return allItems;
+
+
+
+         function fetchAllVideos() {
+            return fetchAllVideosFrom(currentPlaylistId);
         }
 
         async function fetchVideoTags(videoIds) {
@@ -538,6 +594,31 @@
             return tagsMap;
         }
 
+        async function fetchAllVideosFrom(playlistId) {
+            let allItems = [];
+            let pageToken = '';
+
+            do {
+                const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                allItems = allItems.concat(data.items);
+                pageToken = data.nextPageToken || '';
+            } while (pageToken);
+
+            const videoIds = allItems.map(item => item.snippet.resourceId.videoId);
+            const videoMeta = await fetchVideoTags(videoIds);
+
+            allItems.forEach(item => {
+                const vid = item.snippet.resourceId.videoId;
+                const meta = videoMeta[vid] || { tags: [], title: item.snippet.title };
+
+                item.tags = meta.tags;
+                item.snippet.title = meta.title;
+            });
+
+            return allItems;
+         }
 
 
     
@@ -549,7 +630,10 @@
         }
 
         const reverseByDefault = [
-            'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih' 
+            'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih',
+            'PLCrqR_JpjIzwzJerXcmjS33AVMIMsuvQe',
+            'PLCrqR_JpjIzzjoUzC4GMrtt43EUqgkHbM',
+            'PLkYAFN95Zse9tmkzv4PXOfGucbF1_vXQ3'
         ];
 
  
@@ -578,10 +662,16 @@
             videoElement.setAttribute('data-video-id', videoId);
             videoElement.setAttribute('data-title', title);
 
+            const isFavorite = getFavorites().includes(videoId);
+
             videoElement.innerHTML = `
-                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
-                <h3>${title}</h3>
+            <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
+            <h3>${title}</h3>
+            <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
+                ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
+            </button>
             `;
+
 
        
             videoElement.addEventListener('click', () => loadVideo(videoId));
@@ -591,38 +681,63 @@
     
     }
 
-            function filterVideos() {
-            const query = document.getElementById("search-input").value.toLowerCase();
-            const container = document.getElementById("video-container");
-            container.innerHTML = '';
+    function filterVideos() {
+        const query = document.getElementById("search-input").value.toLowerCase().trim();
+        const container = document.getElementById("video-container");
+        container.innerHTML = '';
 
-            let filtered = allVideos.filter(item => {
-                const title = item.snippet.title.toLowerCase();
-                const tags = (item.tags || []).map(tag => tag.toLowerCase());
-                return title.includes(query) || tags.some(tag => tag.includes(query));
-            });
-
-            if (reversed) filtered = filtered.reverse();
-
-            filtered.forEach(item => {
-                const videoId = item.snippet.resourceId.videoId;
-                const title = item.snippet.title;
-                const thumbnailUrl = item.snippet.thumbnails.medium.url;
-
-                const videoElement = document.createElement('div');
-                videoElement.className = 'video';
-                videoElement.setAttribute('data-video-id', videoId);
-                videoElement.setAttribute('data-title', title);
-
-                videoElement.innerHTML = `
-                    <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
-                    <h3>${title}</h3>
-                `;
-
-                videoElement.addEventListener('click', () => loadVideo(videoId));
-                container.appendChild(videoElement);
-            });
+        // If search is empty, return to normal playlist
+        if (query === '') {
+            inSearchMode = false;
+            viewingFavorites = false;
+            displayVideos();
+            return;
         }
+
+        inSearchMode = true;
+        viewingFavorites = false;
+
+        // Filter across all playlists
+        const filtered = allPlaylistsVideos.filter(item => {
+            const title = item.snippet.title.toLowerCase();
+            const tags = (item.tags || []).map(tag => tag.toLowerCase());
+            return title.includes(query) || tags.some(tag => tag.includes(query));
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="text-align:center;">No results found for "${query}"</p>`;
+            return;
+        }
+
+        // Display search results
+        filtered.forEach(item => {
+            const videoId = item.snippet.resourceId.videoId;
+            const rawTitle = item.snippet.title;
+            const thumbnailUrl = item.snippet.thumbnails.medium.url;
+            const isFavorite = getFavorites().includes(videoId);
+
+            // Highlight matched part in title
+            const highlightedTitle = highlightMatch(rawTitle, query);
+
+            const videoElement = document.createElement('div');
+            videoElement.className = 'video';
+            videoElement.setAttribute('data-video-id', videoId);
+            videoElement.setAttribute('data-title', rawTitle);
+
+            videoElement.innerHTML = `
+            <img src="${thumbnailUrl}" alt="${rawTitle}" class="video-thumbnail" />
+            <h3>${highlightedTitle}</h3>
+            <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
+                ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
+            </button>
+            `;
+
+            videoElement.addEventListener('click', () => loadVideo(videoId));
+            container.appendChild(videoElement);
+        });
+    }
+
+
 
 
      
@@ -682,10 +797,26 @@
       
         function changePlaylist(newPlaylistId, index) {
             currentPlaylistId = newPlaylistId;
-            reversed = false; 
+            reversed = false;
+            viewingFavorites = false;
+            inSearchMode = false;
+
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
             loadVideos();
             setActiveButton(index);
         }
+
+        function highlightMatch(text, query) {
+            const regex = new RegExp(`(${query})`, 'ig');
+            return text.replace(regex, `<mark>$1</mark>`);
+        }
+
+
+
 
         // 🌗 Dark/Light mode toggle
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -720,8 +851,23 @@
         }
 
       
-        generatePlaylistButtons();
-        loadVideos();
+        (async function init() {
+            generatePlaylistButtons();
+
+            
+            const splash = document.getElementById('splash-text');
+            splash.textContent = '✨ Loading videos...';
+
+            await loadVideos(); 
+
+            setSplashMessage();
+
+            setTimeout(() => {
+                preloadAllVideos();
+            }, 500);
+        })();
+
+
 
         function createSparkle() {
             const sparkle = document.createElement("div");
@@ -792,15 +938,93 @@
         return `${month}-${day}`;
         }
 
-        const splash = document.getElementById('splash-text');
-        const todayKey = getTodayKey();
+        function setSplashMessage() {
+            const splash = document.getElementById('splash-text');
+            const todayKey = getTodayKey();
 
-        if (splashOverrides[todayKey]) {
-        splash.textContent = splashOverrides[todayKey];
-        } else {
-        const randomSplash = splashMessages[Math.floor(Math.random() * splashMessages.length)];
-        splash.textContent = randomSplash;
+            if (splashOverrides[todayKey]) {
+                splash.textContent = splashOverrides[todayKey];
+            } else {
+                const randomSplash = splashMessages[Math.floor(Math.random() * splashMessages.length)];
+                splash.textContent = randomSplash;
+            }
         }
+
+
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('favoriteVideos') || '[]');
+            }
+
+     function saveFavorites(favArray) {
+            localStorage.setItem('favoriteVideos', JSON.stringify(favArray));
+         }
+
+    function toggleFavorite(videoId, event) {
+            event.stopPropagation(); // Prevent modal from opening
+
+            let favorites = getFavorites();
+            const isFav = favorites.includes(videoId);
+
+            if (isFav) {
+                favorites = favorites.filter(id => id !== videoId);
+            } else {
+                favorites.push(videoId);
+            }
+
+            saveFavorites(favorites);
+
+            const query = document.getElementById("search-input").value.trim();
+
+            
+            if (viewingFavorites) {
+                showFavorites(); 
+            } else if (query !== '') {
+                filterVideos();
+            } else {
+                displayVideos(); 
+            }
+            }
+
+
+
+        function showFavorites() {
+            viewingFavorites = true;
+            const favorites = getFavorites();
+
+            if (favorites.length === 0) {
+                document.getElementById('video-container').innerHTML = '<p style="text-align:center;">No favorites yet!</p>';
+                return;
+            }
+
+            const filtered = allPlaylistsVideos.filter(item =>
+                favorites.includes(item.snippet.resourceId.videoId)
+            );
+
+            const container = document.getElementById("video-container");
+            container.innerHTML = '';
+
+            filtered.forEach(item => {
+                const videoId = item.snippet.resourceId.videoId;
+                const title = item.snippet.title;
+                const thumbnailUrl = item.snippet.thumbnails.medium.url;
+
+                const videoElement = document.createElement('div');
+                videoElement.className = 'video';
+                videoElement.setAttribute('data-video-id', videoId);
+                videoElement.setAttribute('data-title', title);
+
+                videoElement.innerHTML = `
+                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
+                <h3>${title}</h3>
+                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">💔 Remove</button>
+                `;
+
+                videoElement.addEventListener('click', () => loadVideo(videoId));
+                container.appendChild(videoElement);
+            });
+            }
+
+
     </script>
 </body>
 </html>
