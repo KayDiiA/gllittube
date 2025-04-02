@@ -134,6 +134,7 @@
             text-align: center;
             margin-top: 20px;
             margin-bottom: 20px;
+           
             overflow: hidden;
         }
         #site-logo {
@@ -156,7 +157,7 @@
         }
         #logo-caption {
             font-size: 10px;
-            color: #bbb;
+            color: #fff;
             margin-top: 4px;
             text-align: center;
             font-style: italic;
@@ -341,6 +342,25 @@
             }
         }
 
+        #corner-logo {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        }
+
+        #corner-logo img {
+        width: 80px; /* adjust size as needed */
+        height: auto;
+        opacity: 0.9;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        cursor: pointer;
+        }
+
+        #corner-logo img:hover {
+        transform: scale(1.1);
+        opacity: 1;
+        }
 
 
         
@@ -363,7 +383,10 @@
       <p id="splash-text">✨ Loading magic...</p>
 
       <div id="sparkle-container"></div>
-
+      
+      <div id="corner-logo">
+        <img src="pandora.png" alt="Corner Logo" />
+      </div>
 
 
     <!-- Playlist Buttons -->
@@ -735,6 +758,8 @@
         "Stop .. S.T.O.P",
         "Yunah, we love you🐆",
         "Welcome to the Pink Cabinet",
+        "Minju Duck 🪿",
+        "キラキラ✨",
         "Powered by ILLIT energy ✨",
         "Cherish My Love ❤️",
         "You're a lucky girl!",
