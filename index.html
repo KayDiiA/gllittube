@@ -436,6 +436,141 @@
         color: #999;
         }
 
+        .share-btn {
+            margin-top: 6px;
+            background-color: #ccf;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'berk', sans-serif;
+            margin-left: 5px;
+            position: relative;
+            overflow: visible;
+        }
+
+
+        body.light .share-btn {
+            background-color: #b3d1ff;
+        }
+
+        #discography-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            justify-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+
+        #discography-grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .album-card-grid {
+            background-color: #202020;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            width: 100%;
+            max-width: 220px;
+            box-shadow: 0 0 8px rgba(255, 119, 198, 0.3);
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .album-card-grid:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 12px rgba(255, 119, 198, 0.5);
+        }
+
+        .album-art-grid {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .album-info-grid h3 {
+            font-family: 'berk', sans-serif;
+            font-size: 14px;
+            margin: 0 0 4px;
+            color: #fff !important;
+            font-weight: bold;
+            line-height: 1.3;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+            word-break: break-word;
+            text-align: center;
+        }
+
+
+        .release-date {
+            color: #ccc;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .spotify-btn-grid {
+            background: #1DB954;
+            color: white;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'berk', sans-serif;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+
+        .spotify-btn-grid:hover {
+            background-color: #ff52b7;
+        }
+
+        #discography-btn {
+            padding: 10px 20px;
+            background-color: #ff77c6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'berk', sans-serif;
+            margin-top: 10px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #discography-btn:hover {
+            background-color: #ff52b7;
+        }
+
+        body.light #discography-btn {
+            background-color: #F0C1E1;
+        }
+
+        body.light #discography-btn:hover {
+            background-color: #FDDBBB;
+        }
+
+        .video-buttons {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 6px;
+        flex-wrap: wrap;
+        }
+
+
 
 
 
@@ -493,11 +628,17 @@
       <div style="text-align: center; margin-top: 20px;">
         <button id="reverse-btn" onclick="reverseOrder()">Sort</button>
         <button id="favorites-btn" onclick="showFavorites()">⭐ Favorites</button>
+        <button id="discography-btn" onclick="toggleDiscography()">🎵 Discography</button>
       </div>
       
       
     <!-- Video Container -->
     <div id="video-container"></div>
+
+    <div id="discography-container" style="display: none; padding: 20px;">
+        <!-- Discography will be inserted here -->
+    </div>
+    
 
     <!-- Loading Indicator -->
     <div id="loading" style="display: none;">Loading...</div>
@@ -552,6 +693,7 @@
             { name: 'ILLIT Ready', id: 'PLr-TseZWHDKm0tyqvhSo_tDfNezNoBUTj' },
             { name: 'Log-It', id: 'PLr-TseZWHDKmYNhB5qsaxPZKhhjL3qakl' },
             { name: '10 Minute Debate', id: 'PLr-TseZWHDKnRRStlMrskwNNaCHcBZMqZ' },
+            { name: 'Seasonal', id: 'PLr-TseZWHDKk7M48FvfDkhmvTpAV_YIAd' },
             { name: 'Introduce ILLIT', id: 'PLr-TseZWHDKkzkTNLxlB_GfGxsoyO41TU' },
 
         ];
@@ -784,12 +926,17 @@
             const isFavorite = getFavorites().includes(videoId);
 
             videoElement.innerHTML = `
-            <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
-            <h3>${title}</h3>
-            <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
-                ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
-            </button>
+                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
+                <h3>${title}</h3>
+               <div class="video-buttons">
+                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
+                    ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
+                </button>
+                <button class="share-btn" onclick="shareVideo('${videoId}', event)">🔗 Share</button>
+                </div>
+
             `;
+
 
 
        
@@ -846,10 +993,14 @@
             videoElement.innerHTML = `
             <img src="${thumbnailUrl}" alt="${rawTitle}" class="video-thumbnail" />
             <h3>${highlightedTitle}</h3>
-            <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
-                ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
-            </button>
-            `;
+            <div class="video-buttons">
+                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
+                    ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
+                </button>
+                <button class="share-btn" onclick="shareVideo('${videoId}', event)">🔗 Share</button>
+            </div>
+        `;
+
 
             videoElement.addEventListener('click', () => loadVideo(videoId));
             container.appendChild(videoElement);
@@ -862,29 +1013,37 @@
      
 
      
-        function loadVideo(videoId) {
+    function loadVideo(videoId) {
+    const modal = document.getElementById('video-modal');
+        const container = document.getElementById('video-frame-container');
+
+        // Update URL
+        const newURL = new URL(window.location.href);
+        newURL.searchParams.set('v', videoId);
+        history.pushState({}, '', newURL);
+
+        container.innerHTML = `
+            <iframe
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                frameborder="0"
+                allowfullscreen
+            ></iframe>
+        `;
+
+        modal.classList.add('show');
+    }
+
+    function closeModal() {
             const modal = document.getElementById('video-modal');
             const container = document.getElementById('video-frame-container');
 
-         
-            container.innerHTML = `
-                <iframe
-                    src="https://www.youtube.com/embed/${videoId}?autoplay=1"
-                    frameborder="0"
-                    allowfullscreen
-                ></iframe>
-            `;
-
-            modal.classList.add('show');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('video-modal');
-            const container = document.getElementById('video-frame-container');
-
-        
             container.innerHTML = '';
             modal.classList.remove('show');
+
+            // Remove ?v= from URL
+            const newURL = new URL(window.location.href);
+            newURL.searchParams.delete('v');
+            history.pushState({}, '', newURL);
         }
 
     
@@ -920,6 +1079,14 @@
             viewingFavorites = false;
             inSearchMode = false;
 
+            const discographyContainer = document.getElementById('discography-container');
+            if (discographyContainer) {
+                discographyContainer.style.display = 'none';
+                showingDiscography = false;
+            }
+
+            document.getElementById('video-container').style.display = 'grid'; // ✅ Show videos
+
             const searchInput = document.getElementById('search-input');
             if (searchInput) {
                 searchInput.value = '';
@@ -929,10 +1096,26 @@
             setActiveButton(index);
         }
 
+
         function highlightMatch(text, query) {
             const regex = new RegExp(`(${query})`, 'ig');
             return text.replace(regex, `<mark>$1</mark>`);
         }
+
+
+        function shareVideo(videoId, event) {
+            event.stopPropagation(); // prevent modal opening
+
+            const url = `${window.location.origin}/?v=${videoId}`;
+
+            navigator.clipboard.writeText(url).then(() => {
+                showCopyFeedback(event.target, "🔗 Link copied!");
+            }).catch(() => {
+                prompt("Copy this link manually:", url);
+            });
+        }
+
+
 
 
 
@@ -972,12 +1155,20 @@
       
         (async function init() {
             generatePlaylistButtons();
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoIdFromURL = urlParams.get('v');
 
             
             const splash = document.getElementById('splash-text');
             splash.textContent = '✨ Loading videos...';
+             
+            await loadVideos(); // or loadAllVideosMerged()
 
-            await loadVideos(); 
+                if (videoIdFromURL) {
+                    console.log("🔗 Opening linked video:", videoIdFromURL);
+                    loadVideo(videoIdFromURL);
+                }
+
 
             setSplashMessage();
 
@@ -1139,6 +1330,39 @@
             }
 
 
+            function showCopyFeedback(button, message) {
+            const feedback = document.createElement("div");
+            feedback.textContent = message;
+            feedback.style.position = "absolute";
+            feedback.style.background = "#333";
+            feedback.style.color = "#fff";
+            feedback.style.padding = "4px 8px";
+            feedback.style.borderRadius = "5px";
+            feedback.style.fontSize = "12px";
+            feedback.style.top = "-28px";
+            feedback.style.left = "0";
+            feedback.style.transform = "translateX(-50%)";
+            feedback.style.whiteSpace = "nowrap";
+            feedback.style.zIndex = "9999";
+            feedback.style.opacity = "0";
+            feedback.style.transition = "opacity 0.3s ease";
+
+            button.style.position = "relative";
+            button.appendChild(feedback);
+
+            requestAnimationFrame(() => {
+                feedback.style.opacity = "1";
+            });
+
+            setTimeout(() => {
+                feedback.style.opacity = "0";
+                setTimeout(() => {
+                    button.removeChild(feedback);
+                }, 300);
+            }, 1500);
+        }
+
+
 
         function showFavorites() {
             viewingFavorites = true;
@@ -1181,6 +1405,124 @@
             apiQueryCount++;
             console.log(`🔎 [API #${apiQueryCount}] ${url}`);
          }
+
+
+         async function getSpotifyToken(clientId, clientSecret) {
+            const response = await fetch("https://accounts.spotify.com/api/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Authorization": "Basic " + btoa(`${clientId}:${clientSecret}`)
+                },
+                body: "grant_type=client_credentials"
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+
+
+        async function loadDiscography() {
+            const container = document.getElementById("discography-container");
+            container.innerHTML = `<p style="text-align:center;">🎵 Loading Songs...</p>`;
+
+            const clientId = "178b3a7f44e74d79b19141832beeaf5e";
+            const clientSecret = "202eefa6a6b349498ca8d83e4d3a2b3f";
+            const illitArtistId = "36cgvBn0aadzOijnjjwqMN"; // ILLIT's Spotify ID
+
+            const token = await getSpotifyToken(clientId, clientSecret);
+
+            // 1. Get all albums/singles
+            const res = await fetch(`https://api.spotify.com/v1/artists/${illitArtistId}/albums?include_groups=album,single&market=US&limit=50`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const albumData = await res.json();
+
+            const albumMap = new Map(); // avoid duplicates
+            const albums = albumData.items.filter(a => {
+                if (albumMap.has(a.name)) return false;
+                albumMap.set(a.name, true);
+                return true;
+            });
+
+            const allTracks = [];
+
+            // 2. For each album, get its tracks
+            for (const album of albums) {
+                const resTracks = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const trackData = await resTracks.json();
+
+                for (const track of trackData.items) {
+                    allTracks.push({
+                        id: track.id,
+                        name: track.name,
+                        release_date: album.release_date,
+                        album_name: album.name,
+                        image: album.images[0].url,
+                        url: track.external_urls.spotify
+                    });
+                }
+            }
+
+            // 3. Sort by release date (most recent first)
+            const sortedTracks = allTracks.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+
+            container.innerHTML = `<h2 style="text-align:center; font-family:'berk', sans-serif;">🎶 ILLIT Songs</h2>`;
+
+            const gridWrapper = document.createElement('div');
+            gridWrapper.id = 'discography-grid-wrapper';
+            container.appendChild(gridWrapper);
+
+            for (const track of sortedTracks) {
+                const card = document.createElement('div');
+                card.className = 'album-card-grid';
+                card.innerHTML = `
+                    <img src="${track.image}" class="album-art-grid" alt="${track.name}" />
+                    <div class="album-info-grid">
+                        <h3>${track.name}</h3>
+                        <p class="release-date">${track.release_date}</p>
+                        <a class="spotify-btn-grid" href="${track.url}" target="_blank">🎧 Open in Spotify</a>
+                    </div>
+                `;
+                gridWrapper.appendChild(card);
+            }
+
+            container.innerHTML += `
+                <p style="text-align:center; font-size:12px; margin-top:20px;">
+                    💚 Follow ILLIT on <a href="https://open.spotify.com/artist/${illitArtistId}" target="_blank">Spotify</a>!
+                </p>`;
+        }
+
+
+
+
+
+         let showingDiscography = false;
+
+        function toggleDiscography() {
+            const videoContainer = document.getElementById("video-container");
+            const discographyContainer = document.getElementById("discography-container");
+            const loading = document.getElementById("loading");
+
+            showingDiscography = !showingDiscography;
+
+            if (showingDiscography) {
+                // Hide videos, show discography
+                videoContainer.style.display = "none";
+                discographyContainer.style.display = "block";
+                loading.style.display = "none";
+                loadDiscography();
+            } else {
+                // Show videos again
+                discographyContainer.style.display = "none";
+                videoContainer.style.display = "grid";
+                displayVideos();
+            }
+        }
+
 
 
 
