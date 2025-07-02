@@ -198,6 +198,71 @@
       100% { opacity: 0.8; transform: scale(0.98) rotate(-1deg);}
     }
 
+    #about-modal {
+      display: none;
+      position: fixed;
+      z-index: 1002;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(60, 0, 60, 0.30);
+      justify-content: center; align-items: center;
+      transition: background 0.3s;
+      font-family: inherit;
+    }
+    #about-modal.active { display: flex; }
+
+    #about-modal-content {
+      background: #fff6ff;
+      color: #cb49ad;
+      border-radius: 16px;
+      padding: 32px 20px 22px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      max-width: 90vw;
+      width: 370px;
+      position: relative;
+      text-align: center;
+      font-family: 'berk', sans-serif;
+      animation: popIn 0.36s cubic-bezier(.7,1.8,.2,.9);
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0.92); opacity: 0; }
+      80%  { transform: scale(1.04);}
+      100% { transform: scale(1); opacity: 1;}
+    }
+
+    #about-modal-content h2 {
+      margin-top: 0;
+      color: #b740a9;
+      font-size: 1.5em;
+      letter-spacing: 0.02em;
+    }
+    #about-modal-content p {
+      margin: 14px 0 0 0;
+      color: #9a48ba;
+      font-size: 1.05em;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    #about-close {
+      position: absolute; top: 11px; right: 18px;
+      background: none; border: none;
+      font-size: 2em; color: #cb49ad;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 10;
+      padding: 0;
+    }
+    #about-close:hover { color: #b740a9; }
+
+    @media (max-width: 600px) {
+      #about-modal-content {
+        padding: 18px 6vw 16px 6vw;
+        width: 94vw;
+        font-size: 1em;
+      }
+      #about-modal-content h2 { font-size: 1.13em; }
+    }
+
+
 
   </style>
 </head>
@@ -437,6 +502,47 @@
     });
   }
 
+      document.addEventListener('DOMContentLoaded', () => {
+      // About modal
+      const aboutBtn = document.querySelector("#menu li:last-child a");
+      const modal = document.getElementById('about-modal');
+      const closeBtn = document.getElementById('about-close');
+      aboutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('active');
+        // For accessibility
+        modal.focus();
+      });
+      closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+      // Close on background click or ESC
+      modal.addEventListener('mousedown', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+      modal.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") modal.classList.remove('active');
+      });
+    });
+
+
   </script>
+
+  <!-- ABOUT MODAL -->
+<div id="about-modal" tabindex="-1">
+  <div id="about-modal-content">
+    <button id="about-close">&times;</button>
+    <h2>About GLLIT TV</h2>
+    <p>
+      Welcome to GLLIT TV!<br>
+      This site is a fan project by Kay (BigGamingGamer0 on Reddit), dedicated to ILLIT and magical vibes.<br>
+      <br>
+      Thank you so much for using GLLIT TV, I will continue to make it a better and better experience.<br>
+      <br>
+      ✨ Watch and enjoy all things ILLIT!<br>
+      <br>
+      <small>Not affiliated with HYBE or BELIFT LAB. For fans, by fans.</small>
+    </p>
+  </div>
+</div>
+
 </body>
 </html>
