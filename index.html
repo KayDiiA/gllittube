@@ -1,1531 +1,442 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLLIT TV</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #181818;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        #playlist-buttons {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #playlist-buttons button {
-            margin: 5px;
-            padding: 10px 20px;
-            background-color: #ff77c6;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'berk', sans-serif;
-        }
-        #playlist-buttons button:hover {
-            background-color: #ff52b7;
-        }
-        #playlist-buttons button.active {
-            background-color: #ff52b7;
-        }
-        #reverse-btn {
-            padding: 10px 20px;
-            background-color: #ff77c6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-family: 'berk', sans-serif;
-        }
-        #reverse-btn:hover {
-            background-color: #ff52b7;
-        }
-        #video-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            justify-content: center; /* ✅ Center the grid itself */
-            gap: 20px;
-            padding: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GLLITTV Home</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#CB9DF0">
 
-        .video {
-            background-color: #202020;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            max-width: 360px; 
-            width: 100%;
-            margin: 0 auto;
-        }
-        .video:hover {
-            transform: scale(1.05);
-        }
-        .video-thumbnail {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-        h3 {
-            font-size: 16px;
-            margin-top: 10px;
-            color: #fff;
-        }
-        #loading {
-            text-align: center;
-            padding: 20px;
-            color: #fff;
-        }
+  <style>
+    @font-face {
+      font-family: 'berk';
+      src: url('kkberkbm.ttf') format('truetype');
+    }
+    body {
+      margin: 0;
+      background-color: #CB9DF0;
+      font-family: 'berk', sans-serif;
+      overflow: hidden;
+    }
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal.show {
-            display: block;
-            opacity: 1;
-        }
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 90%;
-            max-width: 800px;
-            transform: translate(-50%, -50%);
-            background-color: #181818;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            
-        }
-        #video-frame-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; 
-        }
-        #video-frame-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-        }
-        /* Logo styling */
-        #logo-container {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
-           
-            overflow: hidden;
-        }
-        #site-logo {
-            width: 300px;
-            height: auto;
-            max-width: 100%;
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out;
-            
-        }
-        #site-logo:hover {
-            transform: scale(1.05); 
-        }
-        #video-warning {
-            font-size: 12px;
-            color: #aaa;
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 0;
-        }
-        #logo-caption {
-            font-size: 10px;
-            color: #fff;
-            margin-top: 4px;
-            text-align: center;
-            font-style: italic;
-            font-family: 'berk', sans-serif;
-        }
-        
+    /* Video container */
+    #background-video {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      background: linear-gradient(#cb9df0, #ffdde7 85%);
+    }
+    #background-video iframe {
+      width: 100%; height: 100%; border: 0;
+        background: transparent;
 
-        @font-face {
-            font-family: 'berk';
-            src: url('kkberkbm.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            }
+    }
 
+    @media (max-width: 768px) {
+      #background-video {
+        display: none !important;
+      }
+      body {
+        background: linear-gradient(180deg, #CB9DF0 0%, #fff1fa 100%);
+      }
+    }
 
-            #top-link {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                z-index: 1000;
-            }
+    
 
-            #top-link a {
-                background-color: #ff77c6;
-                color: white;
-                text-decoration: none;
-                padding: 8px 16px;
-                border-radius: 5px;
-                font-size: 14px;
-                transition: background-color 0.2s ease-in-out;
-                font-family: 'berk', sans-serif;
-            }
+    /* Single Mute/Unmute control */
+    #video-controls {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 20;
+    }
+    #mute-button {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 36px;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    #mute-button:hover {
+      opacity: 0.7;
+    }
 
-            @media screen and (max-width: 600px) {
-                #top-link {
-                    position: static;
-                    text-align: center;
-                    margin-top: 10px;
-                }
+    /* Sparkles */
+    #sparkle-container {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 1;
+    }
+    .sparkle {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: radial-gradient(circle, #fff6ff, #f4ffd5);
+      border-radius: 50%; opacity: 0;
+      animation: sparkle-float 1.5s ease-out forwards;
+    }
+    @keyframes sparkle-float {
+      0%   { transform: translateY(0)   scale(0.5); opacity:1 }
+      50%  { transform: translateY(-20px) scale(1.2); opacity:1 }
+      100% { transform: translateY(-40px) scale(0.3); opacity:0 }
+    }
 
-                #top-link a {
-                    display: inline-block;
-                    margin-top: 10px;
-                }
-            }
+    /* Logo & menu */
+    .container {
+      display: flex;
+      flex-direction: row;   /* row = side by side */
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+      z-index: 10;
+    }
 
-            #top-link a:hover {
-                background-color: #ff52b7;
-            }
+    #logo {
+      display: block;
+      max-width: 600px;
+      width: 90vw;
+      filter: drop-shadow(0 0 15px rgba(0,0,0,0.6));
+      transition: transform 1s ease;
+    }
+    .logo-slide { transform: translateX(-5vw); }
+    #divider {
+      width: 2px; height: 200px;
+      background: #fff; margin: 0 40px;
+      opacity: 0; transition: opacity 1s ease;
+    }
+    #menu {
+      opacity: 0;
+      transform: translateX(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      background: rgba(0,0,0,0.4);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: left;
+    }
+    #menu.show {
+      opacity: 1; transform: translateX(0);
+    }
+    #menu ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+    #menu li {
+      font-size: 24px; color: #fff; cursor: pointer;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+    #menu li a {
+      text-decoration: none; color: #fff;
+      transition: color 0.3s;
+    }
+    #menu li a:hover { color: #ff77c6; }
 
+    /* Mobile tweaks: logo top, menu mid-screen */
+    
+      /* Logo + Splash stacked vertically */
+    .logo-splash {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 1s cubic-bezier(.5,1.2,.5,1); /* Smooth! */
+      transform: translateX(0); /* initial position */
+      
+    }
 
+    /* Slide effect: add this class to .logo-splash, NOT #logo */
+    .logo-splash.logo-slide {
+      transform: translateX(-5vw);
+    }
 
-        /* Close button */
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 30px;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .close:hover {
-            color: #ff4c91;
-        }
+    #splash-text {
+      font-family: 'berk', 'Press Start 2P', Arial, sans-serif;
+      font-size: clamp(18px, 2.5vw, 38px);   /* Grows with screen, but never tiny or huge */
+      color: #fff6ff;
+      text-align: center;
+      margin: 24px 0 0 0;
+      text-shadow: 2px 2px 0 #000, 0 0 8px #ff77c6;
+      animation: splashIn 2s ease-in-out infinite;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+      z-index: 12;
+      position: relative;
+      display: block;
+      filter: drop-shadow(0 0 2px #fff4fa) drop-shadow(0 0 8px #ff77c6cc);
+      max-width: 95vw;
+      width: 100%;
+      box-sizing: border-box;
+      word-break: break-word;
+    }
 
-        body.light {
-        background-color: #CB9DF0;
-        color: #111;
-        }
-
-        body.light .video {
-        background-color: #FDDBBB;
-        }
-
-        body.light h3 {
-        color: #111;
-        }
-
-        body.light #playlist-buttons button,
-        body.light #reverse-btn,
-        body.light #top-link a,
-        body.light #theme-toggle {
-        background-color: #F0C1E1;
-        color: white;
-        }
-
-        body.light #playlist-buttons button:hover,
-        body.light #reverse-btn:hover,
-        body.light #top-link a:hover,
-        body.light #theme-toggle:hover {
-        background-color: #FDDBBB;
-        }
-
-        body.dark {
-        background-color: #181818;
-        color: #fff;
-        }
-
-        body.dark .video {
-        background-color: #202020;
-        }
-
-        body.dark h3 {
-        color: #fff;
-        }
-
-        body.dark #playlist-buttons button,
-        body.dark #reverse-btn,
-        body.dark #top-link a,
-        body.dark #theme-toggle {
-        background-color: #ff77c6;
-        color: white;
-        }
-
-        body.dark #playlist-buttons button:hover,
-        body.dark #reverse-btn:hover,
-        body.dark #top-link a:hover,
-        body.dark #theme-toggle:hover {
-        background-color: #ff52b7;
-        }
-
-        body {
-            overflow-x: hidden; 
-            }
-
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 20px;
+        min-height: 100vh;
+      }
+      #divider { display: none; }
+      #menu {
+        position: static;
+        transform: none;
+        margin: 40px 0;
+        width: auto;
+      }
         #splash-text {
-            font-family: 'berk', sans-serif;
-            font-size: 16px;
-            color: #ffccff;
-            text-align: center;
-            margin-top: 5px;
-            animation: splashIn 2s ease-in-out infinite;
-        }
+        font-size: clamp(20px, 6vw, 25px);
+        margin-top: 16px;
+        padding: 0 6vw;
+        max-width: 98vw;
+        line-height: 1.25;
+      }
+       .logo-splash.logo-slide {
+      transform: translateX(0vw);
+    }
 
-        @keyframes splashIn {
-            0% {
-                opacity: 0.8;
-                transform: scale(0.98) rotate(-1deg);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.03) rotate(1.5deg);
-            }
-            100% {
-                opacity: 0.8;
-                transform: scale(0.98) rotate(-1deg);
-            }
-        }
-        #sparkle-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999; /* Above everything, but unclickable */
-            }
-
-            .sparkle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: radial-gradient(circle, #fff6ff, #f4ffd5);
-            border-radius: 50%;
-            opacity: 0;
-            animation: sparkle-float 1.5s ease-out forwards;
-            }
-
-            @keyframes sparkle-float {
-            0% {
-                transform: translateY(0) scale(0.5);
-                opacity: 1;
-            }
-            50% {
-                transform: translateY(-20px) scale(1.2);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-40px) scale(0.3);
-                opacity: 0;
-            }
-        }
-
-        #corner-logo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 1000;
-        }
-
-        #corner-logo img {
-        width: 120px; /* adjust size as needed */
-        height: auto;
-        opacity: 0.9;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        cursor: pointer;
-        }
-
-        #corner-logo img:hover {
-        transform: scale(1.1);
-        opacity: 1;
-        }
-
-        @media screen and (max-width: 600px) {
-        #corner-logo {
-            display: none;
-        }
-        }
-
-        .fav-btn {
-        margin-top: 6px;
-        background-color: #ffccff;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        font-family: 'berk', sans-serif;
-        }
-
-        body.light .fav-btn {
-        background-color: #ffcce6;
-        }
-
-        #favorites-btn {
-        padding: 10px 20px;
-        background-color: #ff77c6;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-        font-family: 'berk', sans-serif;
-        margin-left: 10px;
-        }
-        #favorites-btn:hover {
-        background-color: #ff52b7;
-        }
-
-        body.light #favorites-btn {
-        background-color: #F0C1E1;
-        }
-        body.light #favorites-btn:hover {
-        background-color: #FDDBBB;
-        }
-
-        mark {
-        background-color: #B3EBF2;
-        padding: 0 2px;
-        border-radius: 2px;
-        }
-
-        #site-footer {
-        text-align: center;
-        font-size: 12px;
-        color: #aaa;
-        margin: 40px 20px 20px;
-        font-family: 'berk', sans-serif;
-        }
-
-        #site-footer a {
-        color: #ffccff;
-        text-decoration: underline;
-        }
-
-        body.light #site-footer {
-        color: #333;
-        }
-
-        body.light #site-footer a {
-        color: #b64da2;
-        }
-
-        body.light #cache-status {
-        color: #999;
-        }
-
-        .share-btn {
-            margin-top: 6px;
-            background-color: #ccf;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: 'berk', sans-serif;
-            margin-left: 5px;
-            position: relative;
-            overflow: visible;
-        }
+    }
+    @keyframes splashIn {
+      0%   { opacity: 0.8; transform: scale(0.98) rotate(-1deg);}
+      50%  { opacity: 1;   transform: scale(1.03) rotate(1.5deg);}
+      100% { opacity: 0.8; transform: scale(0.98) rotate(-1deg);}
+    }
 
 
-        body.light .share-btn {
-            background-color: #b3d1ff;
-        }
-
-        #discography-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            justify-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-
-        #discography-grid-wrapper {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            justify-items: center;
-        }
-
-        .album-card-grid {
-            background-color: #202020;
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            width: 100%;
-            max-width: 220px;
-            box-shadow: 0 0 8px rgba(255, 119, 198, 0.3);
-            transition: transform 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .album-card-grid:hover {
-            transform: scale(1.03);
-            box-shadow: 0 0 12px rgba(255, 119, 198, 0.5);
-        }
-
-        .album-art-grid {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
-        .album-info-grid h3 {
-            font-family: 'berk', sans-serif;
-            font-size: 14px;
-            margin: 0 0 4px;
-            color: #fff !important;
-            font-weight: bold;
-            line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-            word-break: break-word;
-            text-align: center;
-        }
-
-
-        .release-date {
-            color: #ccc;
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-
-        .spotify-btn-grid {
-            background: #1DB954;
-            color: white;
-            text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-family: 'berk', sans-serif;
-            transition: background-color 0.3s ease;
-            display: inline-block;
-        }
-
-        .spotify-btn-grid:hover {
-            background-color: #ff52b7;
-        }
-
-        #discography-btn {
-            padding: 10px 20px;
-            background-color: #ff77c6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'berk', sans-serif;
-            margin-top: 10px;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        #discography-btn:hover {
-            background-color: #ff52b7;
-        }
-
-        body.light #discography-btn {
-            background-color: #F0C1E1;
-        }
-
-        body.light #discography-btn:hover {
-            background-color: #FDDBBB;
-        }
-
-        .video-buttons {
-        display: flex;
-        gap: 6px;
-        justify-content: center;
-        margin-top: 6px;
-        flex-wrap: wrap;
-        }
-
-
-
-
-
-        
-    </style>
+  </style>
 </head>
 <body>
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <div id="logo-container">
-        <img 
-        src="tv.png" 
-        alt="Site Logo" 
-        id="site-logo"
-        data-dark="tv.png"
-        data-light="tv-light.png"
-        />
+  <div id="sparkle-container"></div>
 
-        <p id="logo-caption">Created by u/BigGamingGamer0 (Kay)</p>
-      </div>
+  <div id="background-video">
+    <iframe
+      id="video-iframe"
+      allow="autoplay; encrypted-media"
+      src=""
+    ></iframe>
+  </div>
 
-      <p id="splash-text">✨ Loading magic...</p>
+  <div id="video-controls">
+    <button id="mute-button">🔇</button>
+  </div>
 
-      <div id="sparkle-container"></div>
-      
-      <div id="corner-logo">
-        <img src="pandora.png" alt="Corner Logo" />
-      </div>
+ <div class="container">
+  <div class="logo-splash">
+    <img id="logo" src="tv-light.png" alt="GLLIT TV Logo" />
+    <p id="splash-text">✨ Loading magic...</p>
+  </div>
+  <div id="divider"></div>
+  <div id="menu">
+    <ul>
+      <li><a href="TV.html">🎬 WATCH-IT</a></li>
+      <!-- <li><a href="#">✨ New GLLIT</a></li> -->
+      <li><a href="https://www.illitville.com">🏠 ILLITville</a></li>
+      <li><a href="https://www.reddit.com/r/illit/">🦄 Reddit</a></li>
+      <li><a href="#">📖 About</a></li>
+    </ul>
+  </div>
+</div>
 
 
-    <!-- Playlist Buttons -->
-    <div id="playlist-buttons">
-        <!-- Buttons will be dynamically added here -->
-    </div>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    // ► Change these IDs as you like:
 
-    <div style="text-align: center; margin-top: 20px;">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search videos by title or tag..."
-          style="padding: 10px; width: 80%; max-width: 400px; border-radius: 5px; border: none;"
-          oninput="filterVideos()"
-        />
-      </div>
-      
-      <div id="top-link">
-        <a href="https://illitville.com" target="_blank">Check out ILLITville</a>
-        
-      </div>
-      <div id="theme-toggle-container" style="text-align: center; margin-top: 10px;">
-        <button id="theme-toggle">🌙 Dark Mode</button>
-      </div>
-      
-      
-  
-      <div style="text-align: center; margin-top: 20px;">
-        <button id="reverse-btn" onclick="reverseOrder()">Sort</button>
-        <button id="favorites-btn" onclick="showFavorites()">⭐ Favorites</button>
-        <button id="discography-btn" onclick="toggleDiscography()">🎵 Discography</button>
-      </div>
-      
-      
-    <!-- Video Container -->
-    <div id="video-container"></div>
+    const videoIds = [
+      'qlgEadao-Sk',
+      'Vk5-c_v4gMU',
+      'UCmgGZbfjmk',
+      'tbDGl7jEazA',
+      '-nEGVrzPaiU',
+      'qjebIv8FYMI',
+      'xRU1XXHIpIc',
+      'negtrQu5mTA'
+    ];
 
-    <div id="discography-container" style="display: none; padding: 20px;">
-        <!-- Discography will be inserted here -->
-    </div>
-    
+    //   const videoIds = [
+    //   'xRU1XXHIpIc'
+    // ];
 
-    <!-- Loading Indicator -->
-    <div id="loading" style="display: none;">Loading...</div>
+    // Pick one at random:
+    const chosenId = videoIds[Math.floor(Math.random() * videoIds.length)];
 
-    <!-- Video Modal -->
-    <div id="video-modal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeModal()">&times;</span>
-          
-         
-          <div id="video-frame-container"></div>
-      
-    
-          <p id="video-warning">
-            If the video says unavailable, the channel it is uploaded to does not allow embedding, the video must be watched on Youtube.</p>
-        </div>
-      </div>
+    // Build and set iframe src
+    const params = [
+      'enablejsapi=1',
+      'autoplay=1',
+      'mute=1',
+      'loop=1',
+      `playlist=${chosenId}`,
+      'controls=0',
+      'modestbranding=1',
+      'playsinline=1',
+      'cc_load_policy=0'
+    ].join('&');
+    document.getElementById('video-iframe').src =
+      `https://www.youtube.com/embed/${chosenId}?${params}`;
 
-      <div id="cache-status" style="text-align: center; font-size: 11px; color: #666; margin-bottom: 10px; font-family: 'berk', sans-serif;"></div>
+    let player, isReady = false, isMuted = true;
 
-      <footer id="site-footer">
-        <hr style="border: 1px solid #fff; opacity: 0.2; width: 80%; margin: 30px auto;" />
-        <p>
-          All videos are embedded from YouTube.<br />
-          Content belongs to their respective owners.<br />
-          We are in no way affiliated with or sponsored by YouTube or Google.<br />
-          Powered by the <a href="https://developers.google.com/youtube/" target="_blank">YouTube API</a>.<br />
-          <a href="privacy.html">Privacy Policy</a> | <a href="mailto:kay@gllit.tv">Contact Us at kay@gllit.tv</a> <br />
-          Use of this site is subject to the <a href="https://www.youtube.com/t/terms" target="_blank">YouTube Terms of Service</a>.
-        </p>
-      </footer>
-      
-
-      
-
-    <script>
-         const API_KEY = 'AIzaSyBvMFFCIzxQ1hzaJHrEgXBKDY7zg0MQv9s'; 
-
-       
-        const playlists = [
-            { name: 'All Variety', id: 'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih' },  
-            { name: 'Super ILLIT', id: 'PLr-TseZWHDKkf9F59CdpvT2Zbj-vCwNQg' }, 
-            { name: 'Music Videos', id: 'PLCrqR_JpjIzwzJerXcmjS33AVMIMsuvQe' },
-            { name: 'Dance Practices', id: 'PLCrqR_JpjIzzjoUzC4GMrtt43EUqgkHbM' },
-            { name: 'Behind-It', id: 'PLr-TseZWHDKk2YN6b7nHzUpkReQDhS-Xw' }, 
-            { name: 'ILLIT On-Air', id: 'PLr-TseZWHDKmtATvbZQwVdoiDaKozx5EK' }, 
-            { name: 'Minju\'s Pink Cabinet', id: 'PLkYAFN95Zse9tmkzv4PXOfGucbF1_vXQ3' },
-            { name: 'Night Of ILLIT', id: 'PLr-TseZWHDKl0kFGW5RS5W0eWj38Ut1wQ' },
-            { name: 'Super Real ILLIT', id: 'PLr-TseZWHDKkW2zufgb85THhTdNO4fxCI' },
-            { name: 'Beside-It', id: 'PLr-TseZWHDKmJ3tAXRWCZvXXq5DppUguz' },
-            { name: 'I\'ll Like It', id: 'PLr-TseZWHDKk_ZQVcjKZtuvwmukFCBRVi' },
-            { name: 'ILLIT Ready', id: 'PLr-TseZWHDKm0tyqvhSo_tDfNezNoBUTj' },
-            { name: 'Log-It', id: 'PLr-TseZWHDKmYNhB5qsaxPZKhhjL3qakl' },
-            { name: '10 Minute Debate', id: 'PLr-TseZWHDKnRRStlMrskwNNaCHcBZMqZ' },
-            { name: 'Seasonal', id: 'PLr-TseZWHDKk7M48FvfDkhmvTpAV_YIAd' },
-            { name: 'Introduce ILLIT', id: 'PLr-TseZWHDKkzkTNLxlB_GfGxsoyO41TU' },
-
-        ];
-
-        let currentPlaylistId = playlists[0].id; 
-        let allVideos = [];
-        let reversed = false;
-
-        let apiQueryCount = 0;
-
-        let viewingFavorites = false;
-        let allPlaylistsVideos = [];
-        let inSearchMode = false;
-
-        function getCachedData(key) {
-        const data = localStorage.getItem(key);
-        if (!data) return null;
-
-        try {
-            const { timestamp, payload } = JSON.parse(data);
-            const age = Date.now() - timestamp;
-
-            if (age < 1000 * 60 * 60 * 6) {
-            showCacheStatus("📦 Using cached data");
-            return payload;
-            } else {
-            localStorage.removeItem(key);
-            }
-        } catch {
-            localStorage.removeItem(key);
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('video-iframe', {
+        events: {
+          onReady(e) {
+            isReady = true;
+            e.target.playVideo();
+            e.target.mute();
+          },
+          onStateChange(e) {
+            if (e.data === YT.PlayerState.ENDED) e.target.playVideo();
+          }
         }
+      });
+    }
 
-        return null;
-        }
-
-        function setCachedData(key, payload) {
-        showCacheStatus("🌐 Fetched fresh data");
-        localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), payload }));
-        }
-
-        function showCacheStatus(message) {
-        const el = document.getElementById("cache-status");
-        if (el) el.textContent = message;
-        }
-
-
-
-
-
-        function generatePlaylistButtons() {
-            const container = document.getElementById('playlist-buttons');
-            playlists.forEach((playlist, index) => {
-                const button = document.createElement('button');
-                button.innerText = playlist.name;
-                button.onclick = () => changePlaylist(playlist.id, index);
-                button.classList.add('playlist-btn');
-                button.setAttribute('data-index', index);
-                container.appendChild(button);
-            });
-         
-            setActiveButton(0);
-        }
-
-        async function preloadAllVideos() {
-            let merged = [];
-
-            for (const playlist of playlists) {
-                if (playlist.id === currentPlaylistId) continue; // ✅ Skip currently loaded playlist
-
-                const items = await fetchAllVideosFrom(playlist.id);
-                merged = merged.concat(items);
-            }
-
-            // Also include already-loaded videos
-            merged = merged.concat(allVideos);
-
-            // ✅ Deduplicate
-            const uniqueMap = new Map();
-            merged.forEach(item => {
-                const id = item.snippet.resourceId.videoId;
-                if (!uniqueMap.has(id)) {
-                uniqueMap.set(id, item);
-                }
-            });
-
-            allPlaylistsVideos = Array.from(uniqueMap.values());
-         }
-
-
-
-
-         function fetchAllVideos() {
-            return fetchAllVideosFrom(currentPlaylistId);
-        }
-
-        async function fetchVideoTags(videoIds) {
-            const tagsMap = {};
-            const chunkSize = 50;
-
-            for (let i = 0; i < videoIds.length; i += chunkSize) {
-                const chunk = videoIds.slice(i, i + chunkSize).join(',');
-                const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,localizations&id=${chunk}&key=${API_KEY}`;
-                logAPIQuery(url);
-                const response = await fetch(url);
-                const data = await response.json();
-
-                data.items.forEach(video => {
-                    const videoId = video.id;
-                    const tags = video.snippet.tags || [];
-                    const localizedTitle = video.localizations?.en?.title || video.snippet.title;
-
-                    tagsMap[videoId] = {
-                        tags: tags,
-                        title: localizedTitle
-                    };
-                });
-            }
-
-            return tagsMap;
-        }
-
-        async function fetchAllVideosFrom(playlistId) {
-            const cacheKey = `playlistData_${playlistId}`;
-            const cached = localStorage.getItem(cacheKey);
-
-            let cachedCount = 0;
-
-            if (cached) {
-                try {
-                const parsed = JSON.parse(cached);
-                cachedCount = parsed.payload.length;
-                const age = Date.now() - parsed.timestamp;
-
-                if (age < 1000 * 60 * 60 * 6) {
-                   
-                    const countCheckURL = `https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`;
-                    logAPIQuery(countCheckURL);
-                    const response = await fetch(countCheckURL);
-                    const data = await response.json();
-                    const itemCount = data?.items?.[0]?.contentDetails?.itemCount || 0;
-
-                    if (itemCount === cachedCount) {
-                    showCacheStatus("📦 Using cached data");
-                    return parsed.payload;
-                    }
-                }
-                } catch {
-                localStorage.removeItem(cacheKey);
-                }
-            }
-
-            // 🔄 Fetch full list fresh
-            let allItems = [];
-            let pageToken = '';
-            do {
-                const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`;
-                logAPIQuery(url);
-                const response = await fetch(url);
-                const data = await response.json();
-                allItems = allItems.concat(data.items);
-                pageToken = data.nextPageToken || '';
-            } while (pageToken);
-
-            const videoIds = allItems.map(item => item.snippet.resourceId.videoId);
-            const videoMeta = await fetchVideoTags(videoIds);
-
-            allItems.forEach(item => {
-                const vid = item.snippet.resourceId.videoId;
-                const meta = videoMeta[vid] || { tags: [], title: item.snippet.title };
-                item.tags = meta.tags;
-                item.snippet.title = meta.title;
-            });
-
-            // 💾 Save to cache
-            localStorage.setItem(cacheKey, JSON.stringify({
-                timestamp: Date.now(),
-                payload: allItems
-            }));
-
-            showCacheStatus("🌐 Fetched fresh data");
-            return allItems;
-}
-
-
-
-
-
-    
-        async function loadVideos() {
-            document.getElementById('loading').style.display = 'block';
-            allVideos = await fetchAllVideos();
-            document.getElementById('loading').style.display = 'none';
-            displayVideos(); 
-            console.log(`📊 Total API queries this session: ${apiQueryCount}`);
-        }
-
-        const reverseByDefault = [
-            'PLCrqR_JpjIzwq8PZ9uwrnrvYbw6jaY3ih',
-            'PLCrqR_JpjIzwzJerXcmjS33AVMIMsuvQe',
-            'PLCrqR_JpjIzzjoUzC4GMrtt43EUqgkHbM',
-            'PLkYAFN95Zse9tmkzv4PXOfGucbF1_vXQ3'
-        ];
-
- 
-    function displayVideos() {
-        const container = document.getElementById('video-container');
-        container.innerHTML = ''; 
-
-       
-        let videosToDisplay = [...allVideos]; 
-
-        if (reverseByDefault.includes(currentPlaylistId)) {
-            console.log(`Reversing playlist: ${currentPlaylistId}`);
-            videosToDisplay.reverse();
-            reversed = true; 
+   document.addEventListener('DOMContentLoaded', () => {
+      // Mute/unmute toggle
+      const btn = document.getElementById('mute-button');
+      btn.addEventListener('click', () => {
+        if (!isReady) return;
+        if (isMuted) {
+          player.unMute();
+          isMuted = false;
+          btn.textContent = '🔊';
         } else {
-            reversed = false; 
+          player.mute();
+          isMuted = true;
+          btn.textContent = '🔇';
         }
+      });
 
-        videosToDisplay.forEach(item => {
-            const videoId = item.snippet.resourceId.videoId;
-            const title = item.snippet.title;
-            const thumbnailUrl = item.snippet.thumbnails.medium.url;
-
-            const videoElement = document.createElement('div');
-            videoElement.className = 'video';
-            videoElement.setAttribute('data-video-id', videoId);
-            videoElement.setAttribute('data-title', title);
-
-            const isFavorite = getFavorites().includes(videoId);
-
-            videoElement.innerHTML = `
-                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
-                <h3>${title}</h3>
-               <div class="video-buttons">
-                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
-                    ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
-                </button>
-                <button class="share-btn" onclick="shareVideo('${videoId}', event)">🔗 Share</button>
-                </div>
-
-            `;
-
-
-
-       
-            videoElement.addEventListener('click', () => loadVideo(videoId));
-            container.appendChild(videoElement);
+      // sparkle effect
+      setInterval(() => {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        const x = Math.random() * innerWidth, y = Math.random() * innerHeight;
+        const size = Math.random() * 6 + 6;
+        Object.assign(s.style, {
+          left: `${x}px`,
+          top:  `${y}px`,
+          width:  `${size}px`,
+          height: `${size}px`
         });
+        document.getElementById('sparkle-container').appendChild(s);
+        setTimeout(() => s.remove(), 1500);
+      }, 100);
 
-    
+      // logo & menu animation
+      setTimeout(() => {
+      document.querySelector('.logo-splash').classList.add('logo-slide');
+      document.getElementById('divider').style.opacity = '1';
+      document.getElementById('menu').classList.add('show');
+    }, 2000);
+
+
+      // Set the animated splash message!
+      setSplashMessage();
+    });
+
+
+    const splashMessages = [
+      "Hamborghini 🏎️",
+      "We are all magical girls! ✨",
+      "✨Sparkling like glitter!✨",
+      "Now with 200% more pink!",
+      "A mood only ILLIT can deliver 💅",
+      "Too cute, system error 💻🐞",
+      "Kay was here 💕",
+      "Streaming My World on repeat 🔁",
+      "Streaming Magnetic on repeat 🔁",
+      "Streaming Lucky Girl Syndrome on repeat 🔁",
+      "Streaming Midnight Fiction on repeat 🔁",
+      "Streaming Cherish (My Love) on repeat 🔁",
+      "Streaming I'll Like You on repeat 🔁",
+      "Streaming IYKYK on repeat 🔁",
+      "Streaming Pimple on repeat 🔁",
+      "Wonhee is cute!",
+      "This time I want...",
+      "R&B version loading... 🎧💜",
+      "Not a pimple, just pop star power 💥",
+      "Lucky Girl Syndrome engaged 🍀",
+      "Wonhee is cute!",
+      "Just another glittery day in My World ✨",
+      "Cafe Moka ☕",
+      "I'll like you... a LOT 💞",
+      "Floating in the Starlight Remix 💫",
+      "If you know, you know. IYKYK 😏",
+      "ILLIT vocals > oxygen 💨🎶",
+      "Squirtle.. I mean.. Iroha 🐢",
+      "My World? It's glitter-covered 🌎✨",
+      "Soft pastels, strong beats 🎀🔥",
+      "Stop .. S.T.O.P",
+      "This is not a dream — it's ILLIT 💭",
+      "Yunah, we love you🐆",
+      "Mood: Pink glitter explosion 💗✨",
+      "Visuals? Vocals? Vibes? ✅✅✅",
+      "Welcome to the Pink Cabinet",
+      "Minju Duck 🪿",
+      "キラキラ✨",
+      "Powered by ILLIT energy ✨",
+      "Moka Mode: Activated 🧋",
+      "Iroha's Dance Break! 💃",
+      "Stanning in style 💅",
+      "Cherish My Love ❤️",
+      "Glitter isn't a color, it's a lifestyle ✨",
+      "K-Pop never looked this glittery 🌈",
+      "ILLIT is love, ILLIT is life 💘",
+      "You're a lucky girl!",
+      "Tick-tack, ti-ra, tick-tack-ta",
+      "Life is like a box of Almond Chocolates 🍫",
+      "It's my fitting room, 바꿔 attitude 👗",
+      "lub-dub ❤️",
+      "Bae, bae, bae, bae, bae, bae, bae, bae, bae",
+      "You, you, you, you, like it's magnetic",
+      "Join r/ILLIT today!"
+    ];
+
+
+    // const splashMessages = [
+    //   "We are all magical girls! ✨",
+
+    // ];
+
+    // 🎉 Splash overrides for special days
+    const splashOverrides = {
+      "12-25": "Merry Christmas! 🎄",
+      "10-31": "Spooky season is here! 🎃",
+      "02-14": "Happy Valentine's Day 💘",
+      "01-15": "Happy Birthday Yunah! 🎂", 
+      "05-11": "Happy Birthday Minju! 🎂", 
+      "10-08": "Happy Birthday Moka! 🎂", 
+      "06-26": "Happy Birthday Wonhee! 🎂", 
+      "02-04": "Happy Birthday Iroha! 🎂",
+    };
+
+    function getTodayKey() {
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // 0-indexed
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${month}-${day}`;
     }
 
-    function filterVideos() {
-        const query = document.getElementById("search-input").value.toLowerCase().trim();
-        const container = document.getElementById("video-container");
-        container.innerHTML = '';
-
-        // If search is empty, return to normal playlist
-        if (query === '') {
-            inSearchMode = false;
-            viewingFavorites = false;
-            displayVideos();
-            return;
-        }
-
-        inSearchMode = true;
-        viewingFavorites = false;
-
-        // Filter across all playlists
-        const filtered = allPlaylistsVideos.filter(item => {
-            const title = item.snippet.title.toLowerCase();
-            const tags = (item.tags || []).map(tag => tag.toLowerCase());
-            return title.includes(query) || tags.some(tag => tag.includes(query));
-        });
-
-        if (filtered.length === 0) {
-            container.innerHTML = `<p style="text-align:center;">No results found for "${query}"</p>`;
-            return;
-        }
-
-        // Display search results
-        filtered.forEach(item => {
-            const videoId = item.snippet.resourceId.videoId;
-            const rawTitle = item.snippet.title;
-            const thumbnailUrl = item.snippet.thumbnails.medium.url;
-            const isFavorite = getFavorites().includes(videoId);
-
-            // Highlight matched part in title
-            const highlightedTitle = highlightMatch(rawTitle, query);
-
-            const videoElement = document.createElement('div');
-            videoElement.className = 'video';
-            videoElement.setAttribute('data-video-id', videoId);
-            videoElement.setAttribute('data-title', rawTitle);
-
-            videoElement.innerHTML = `
-            <img src="${thumbnailUrl}" alt="${rawTitle}" class="video-thumbnail" />
-            <h3>${highlightedTitle}</h3>
-            <div class="video-buttons">
-                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">
-                    ${isFavorite ? '💔 Remove' : '⭐ Favorite'}
-                </button>
-                <button class="share-btn" onclick="shareVideo('${videoId}', event)">🔗 Share</button>
-            </div>
-        `;
-
-
-            videoElement.addEventListener('click', () => loadVideo(videoId));
-            container.appendChild(videoElement);
-        });
+    function setSplashMessage() {
+      const splash = document.getElementById('splash-text');
+      const todayKey = getTodayKey();
+      if (splashOverrides[todayKey]) {
+        splash.textContent = splashOverrides[todayKey];
+      } else {
+        const randomSplash = splashMessages[Math.floor(Math.random() * splashMessages.length)];
+        splash.textContent = randomSplash;
+      }
     }
 
-
-
-
-     
-
-     
-    function loadVideo(videoId) {
-    const modal = document.getElementById('video-modal');
-        const container = document.getElementById('video-frame-container');
-
-        // Update URL
-        const newURL = new URL(window.location.href);
-        newURL.searchParams.set('v', videoId);
-        history.pushState({}, '', newURL);
-
-        container.innerHTML = `
-            <iframe
-                src="https://www.youtube.com/embed/${videoId}?autoplay=1"
-                frameborder="0"
-                allowfullscreen
-            ></iframe>
-        `;
-
-        modal.classList.add('show');
-    }
-
-    function closeModal() {
-            const modal = document.getElementById('video-modal');
-            const container = document.getElementById('video-frame-container');
-
-            container.innerHTML = '';
-            modal.classList.remove('show');
-
-            // Remove ?v= from URL
-            const newURL = new URL(window.location.href);
-            newURL.searchParams.delete('v');
-            history.pushState({}, '', newURL);
-        }
-
-    
-        window.onclick = function (event) {
-            const modal = document.getElementById('video-modal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-      
-        function reverseOrder() {
-            const container = document.getElementById('video-container');
-            const videos = Array.from(container.children);
-            container.innerHTML = ''; 
-
-         
-            videos.reverse().forEach(video => container.appendChild(video));
-
-            reversed = !reversed;
-        }
-
-      
-        function changePlaylist(newPlaylistId, index) {
-            currentPlaylistId = newPlaylistId;
-            reversed = false;
-            viewingFavorites = false;
-            inSearchMode = false;
-
-            const discographyContainer = document.getElementById('discography-container');
-            if (discographyContainer) {
-                discographyContainer.style.display = 'none';
-                showingDiscography = false;
-            }
-
-            document.getElementById('video-container').style.display = 'grid'; // ✅ Show videos
-
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.value = '';
-            }
-
-            loadVideos();
-            setActiveButton(index);
-        }
-
-
-        function highlightMatch(text, query) {
-            const regex = new RegExp(`(${query})`, 'ig');
-            return text.replace(regex, `<mark>$1</mark>`);
-        }
-
-
-        function shareVideo(videoId, event) {
-            event.stopPropagation(); // prevent modal opening
-
-            const url = `${window.location.origin}/?v=${videoId}`;
-
-            navigator.clipboard.writeText(url).then(() => {
-                showCopyFeedback(event.target, "🔗 Link copied!");
-            }).catch(() => {
-                prompt("Copy this link manually:", url);
-            });
-        }
-
-
-
-
-
-
-        // 🌗 Dark/Light mode toggle
-        const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.classList.add(savedTheme);
-            updateThemeButtonText(savedTheme);
-
-            document.getElementById('theme-toggle').addEventListener('click', () => {
-            const current = document.body.classList.contains('light') ? 'light' : 'dark';
-            const newTheme = current === 'light' ? 'dark' : 'light';
-            document.body.classList.remove(current);
-            document.body.classList.add(newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeButtonText(newTheme);
-        });
-
-        function updateThemeButtonText(theme) {
-            const toggleBtn = document.getElementById('theme-toggle');
-            toggleBtn.innerText = theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
-
-            const logo = document.getElementById('site-logo');
-            const newLogoSrc = theme === 'light' ? logo.dataset.light : logo.dataset.dark;
-            logo.src = newLogoSrc;
-        }
-
-
-       
-        function setActiveButton(index) {
-            document.querySelectorAll('.playlist-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-index="${index}"]`).classList.add('active');
-        }
-
-      
-        (async function init() {
-            generatePlaylistButtons();
-            const urlParams = new URLSearchParams(window.location.search);
-            const videoIdFromURL = urlParams.get('v');
-
-            
-            const splash = document.getElementById('splash-text');
-            splash.textContent = '✨ Loading videos...';
-             
-            await loadVideos(); // or loadAllVideosMerged()
-
-                if (videoIdFromURL) {
-                    console.log("🔗 Opening linked video:", videoIdFromURL);
-                    loadVideo(videoIdFromURL);
-                }
-
-
-            setSplashMessage();
-
-            setTimeout(() => {
-                preloadAllVideos();
-            }, 500);
-        })();
-
-
-
-        function createSparkle() {
-            const sparkle = document.createElement("div");
-            sparkle.classList.add("sparkle");
-
-            const container = document.getElementById("sparkle-container");
-            const size = Math.random() * 6 + 6; // 6–12px
-            const posX = Math.random() * window.innerWidth;
-            const posY = Math.random() * window.innerHeight;
-
-            sparkle.style.left = `${posX}px`;
-            sparkle.style.top = `${posY}px`;
-            sparkle.style.width = `${size}px`;
-            sparkle.style.height = `${size}px`;
-
-            container.appendChild(sparkle);
-
-            // Remove after animation
-            setTimeout(() => {
-                sparkle.remove();
-            }, 1500);
-            }
-
-            // 🧚‍♀️ Sprinkle sparkles every few hundred ms
-            setInterval(() => {
-            createSparkle();
-            }, 300); // Adjust for more or fewer sparkles
-
-
-        const splashMessages = [
-        "✨Sparkling like glitter!✨",
-        "Now with 200% more pink!",
-        "A mood only ILLIT can deliver 💅",
-        "Too cute, system error 💻🐞",
-        "Kay was here 💕",
-        "Streaming My World on repeat 🔁",
-        "Streaming Magnetic on repeat 🔁",
-        "Streaming Lucky Girl Syndrome on repeat 🔁",
-        "Streaming Midnight Fiction on repeat 🔁",
-        "Streaming Cherish (My Love) on repeat 🔁",
-        "Streaming I'll Like You on repeat 🔁",
-        "Streaming IYKYK on repeat 🔁",
-        "Streaming Pimple on repeat 🔁",
-        "Wonhee is cute!",
-        "This time I want...",
-        "R&B version loading... 🎧💜",
-        "Not a pimple, just pop star power 💥",
-        "Lucky Girl Syndrome engaged 🍀",
-        "Wonhee is cute!",
-        "Just another glittery day in My World ✨",
-        "Cafe Moka ☕",
-        "I'll like you... a LOT 💞",
-        "Floating in the Starlight Remix 💫",
-        "If you know, you know. IYKYK 😏",
-        "ILLIT vocals > oxygen 💨🎶",
-        "Squirtle.. I mean.. Iroha 🐢",
-        "My World? It's glitter-covered 🌎✨",
-        "Soft pastels, strong beats 🎀🔥",
-        "Stop .. S.T.O.P",
-        "This is not a dream — it's ILLIT 💭",
-        "Yunah, we love you🐆",
-        "Mood: Pink glitter explosion 💗✨",
-        "Visuals? Vocals? Vibes? ✅✅✅",
-        "Welcome to the Pink Cabinet",
-        "Minju Duck 🪿",
-        "キラキラ✨",
-        "Powered by ILLIT energy ✨",
-        "Moka Mode: Activated 🧋",
-        "Iroha's Dance Break! 💃",
-        "Stanning in style 💅",
-        "Cherish My Love ❤️",
-        "Glitter isn't a color, it's a lifestyle ✨",
-        "K-Pop never looked this glittery 🌈",
-        "ILLIT is love, ILLIT is life 💘",
-        "You're a lucky girl!",
-        "Tick-tack, ti-ra, tick-tack-ta",
-        "Life is like a box of Almond Chocolates 🍫",
-        "It's my fitting room, 바꿔 attitude 👗",
-        "lub-dub ❤️",
-        "Bae, bae, bae, bae, bae, bae, bae, bae, bae",
-        "You, you, you, you, like it's magnetic",
-        "Join r/ILLIT today!"
-        ];
-
-        // 🎉 Splash overrides for special days
-        const splashOverrides = {
-        "12-25": "Merry Christmas! 🎄",
-        "10-31": "Spooky season is here! 🎃",
-        "02-14": "Happy Valentine's Day 💘",
-        "01-15": "Happy Birthday Yunah! 🎂", 
-        "05-11": "Happy Birthday Minju! 🎂", 
-        "10-08": "Happy Birthday Moka! 🎂", 
-        "06-26": "Happy Birthday Wonhee! 🎂", 
-        "02-04": "Happy Birthday Iroha! 🎂", 
-       // "04-01": "April Fools! 🤡", 
-        };
-
-        function getTodayKey() {
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // 0-indexed
-        const day = String(now.getDate()).padStart(2, '0');
-        return `${month}-${day}`;
-        }
-
-        function setSplashMessage() {
-            const splash = document.getElementById('splash-text');
-            const todayKey = getTodayKey();
-
-            if (splashOverrides[todayKey]) {
-                splash.textContent = splashOverrides[todayKey];
-            } else {
-                const randomSplash = splashMessages[Math.floor(Math.random() * splashMessages.length)];
-                splash.textContent = randomSplash;
-            }
-        }
-
-
-        function getFavorites() {
-            return JSON.parse(localStorage.getItem('favoriteVideos') || '[]');
-            }
-
-     function saveFavorites(favArray) {
-            localStorage.setItem('favoriteVideos', JSON.stringify(favArray));
-         }
-
-    function toggleFavorite(videoId, event) {
-            event.stopPropagation(); // Prevent modal from opening
-
-            let favorites = getFavorites();
-            const isFav = favorites.includes(videoId);
-
-            if (isFav) {
-                favorites = favorites.filter(id => id !== videoId);
-            } else {
-                favorites.push(videoId);
-            }
-
-            saveFavorites(favorites);
-
-            const query = document.getElementById("search-input").value.trim();
-
-            
-            if (viewingFavorites) {
-                showFavorites(); 
-            } else if (query !== '') {
-                filterVideos();
-            } else {
-                displayVideos(); 
-            }
-            }
-
-
-            function showCopyFeedback(button, message) {
-            const feedback = document.createElement("div");
-            feedback.textContent = message;
-            feedback.style.position = "absolute";
-            feedback.style.background = "#333";
-            feedback.style.color = "#fff";
-            feedback.style.padding = "4px 8px";
-            feedback.style.borderRadius = "5px";
-            feedback.style.fontSize = "12px";
-            feedback.style.top = "-28px";
-            feedback.style.left = "0";
-            feedback.style.transform = "translateX(-50%)";
-            feedback.style.whiteSpace = "nowrap";
-            feedback.style.zIndex = "9999";
-            feedback.style.opacity = "0";
-            feedback.style.transition = "opacity 0.3s ease";
-
-            button.style.position = "relative";
-            button.appendChild(feedback);
-
-            requestAnimationFrame(() => {
-                feedback.style.opacity = "1";
-            });
-
-            setTimeout(() => {
-                feedback.style.opacity = "0";
-                setTimeout(() => {
-                    button.removeChild(feedback);
-                }, 300);
-            }, 1500);
-        }
-
-
-
-        function showFavorites() {
-            viewingFavorites = true;
-            const favorites = getFavorites();
-
-            if (favorites.length === 0) {
-                document.getElementById('video-container').innerHTML = '<p style="text-align:center;">No favorites yet!</p>';
-                return;
-            }
-
-            const filtered = allPlaylistsVideos.filter(item =>
-                favorites.includes(item.snippet.resourceId.videoId)
-            );
-
-            const container = document.getElementById("video-container");
-            container.innerHTML = '';
-
-            filtered.forEach(item => {
-                const videoId = item.snippet.resourceId.videoId;
-                const title = item.snippet.title;
-                const thumbnailUrl = item.snippet.thumbnails.medium.url;
-
-                const videoElement = document.createElement('div');
-                videoElement.className = 'video';
-                videoElement.setAttribute('data-video-id', videoId);
-                videoElement.setAttribute('data-title', title);
-
-                videoElement.innerHTML = `
-                <img src="${thumbnailUrl}" alt="${title}" class="video-thumbnail" />
-                <h3>${title}</h3>
-                <button class="fav-btn" onclick="toggleFavorite('${videoId}', event)">💔 Remove</button>
-                `;
-
-                videoElement.addEventListener('click', () => loadVideo(videoId));
-                container.appendChild(videoElement);
-            });
-        }
-
-        function logAPIQuery(url) {
-            apiQueryCount++;
-            console.log(`🔎 [API #${apiQueryCount}] ${url}`);
-         }
-
-
-         async function getSpotifyToken(clientId, clientSecret) {
-            const response = await fetch("https://accounts.spotify.com/api/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Authorization": "Basic " + btoa(`${clientId}:${clientSecret}`)
-                },
-                body: "grant_type=client_credentials"
-            });
-
-            const data = await response.json();
-            return data.access_token;
-        }
-
-
-
-        async function loadDiscography() {
-            const container = document.getElementById("discography-container");
-            container.innerHTML = `<p style="text-align:center;">🎵 Loading Songs...</p>`;
-
-            const clientId = "178b3a7f44e74d79b19141832beeaf5e";
-            const clientSecret = "202eefa6a6b349498ca8d83e4d3a2b3f";
-            const illitArtistId = "36cgvBn0aadzOijnjjwqMN"; // ILLIT's Spotify ID
-
-            const token = await getSpotifyToken(clientId, clientSecret);
-
-            // 1. Get all albums/singles
-            const res = await fetch(`https://api.spotify.com/v1/artists/${illitArtistId}/albums?include_groups=album,single&market=US&limit=50`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const albumData = await res.json();
-
-            const albumMap = new Map(); // avoid duplicates
-            const albums = albumData.items.filter(a => {
-                if (albumMap.has(a.name)) return false;
-                albumMap.set(a.name, true);
-                return true;
-            });
-
-            const allTracks = [];
-
-            // 2. For each album, get its tracks
-            for (const album of albums) {
-                const resTracks = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const trackData = await resTracks.json();
-
-                for (const track of trackData.items) {
-                    allTracks.push({
-                        id: track.id,
-                        name: track.name,
-                        release_date: album.release_date,
-                        album_name: album.name,
-                        image: album.images[0].url,
-                        url: track.external_urls.spotify
-                    });
-                }
-            }
-
-            // 3. Sort by release date (most recent first)
-            const sortedTracks = allTracks.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
-
-            container.innerHTML = `<h2 style="text-align:center; font-family:'berk', sans-serif;">🎶 ILLIT Songs</h2>`;
-
-            const gridWrapper = document.createElement('div');
-            gridWrapper.id = 'discography-grid-wrapper';
-            container.appendChild(gridWrapper);
-
-            for (const track of sortedTracks) {
-                const card = document.createElement('div');
-                card.className = 'album-card-grid';
-                card.innerHTML = `
-                    <img src="${track.image}" class="album-art-grid" alt="${track.name}" />
-                    <div class="album-info-grid">
-                        <h3>${track.name}</h3>
-                        <p class="release-date">${track.release_date}</p>
-                        <a class="spotify-btn-grid" href="${track.url}" target="_blank">🎧 Open in Spotify</a>
-                    </div>
-                `;
-                gridWrapper.appendChild(card);
-            }
-
-            container.innerHTML += `
-                <p style="text-align:center; font-size:12px; margin-top:20px;">
-                    💚 Follow ILLIT on <a href="https://open.spotify.com/artist/${illitArtistId}" target="_blank">Spotify</a>!
-                </p>`;
-        }
-
-
-
-
-
-         let showingDiscography = false;
-
-        function toggleDiscography() {
-            const videoContainer = document.getElementById("video-container");
-            const discographyContainer = document.getElementById("discography-container");
-            const loading = document.getElementById("loading");
-
-            showingDiscography = !showingDiscography;
-
-            if (showingDiscography) {
-                // Hide videos, show discography
-                videoContainer.style.display = "none";
-                discographyContainer.style.display = "block";
-                loading.style.display = "none";
-                loadDiscography();
-            } else {
-                // Show videos again
-                discographyContainer.style.display = "none";
-                videoContainer.style.display = "grid";
-                displayVideos();
-            }
-        }
-
-
-
-
-    </script>
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').then(function(registration) {
+        // Registration successful
+      }, function(err) {
+        // Registration failed
+        console.warn('ServiceWorker registration failed:', err);
+      });
+    });
+  }
+
+  </script>
 </body>
 </html>
