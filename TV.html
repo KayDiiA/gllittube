@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GLLIT TV</title>
     <style>
-        body {
+        html, body {
             font-family: Arial, sans-serif;
             background-color: #181818;
-            color: #fff;
+            color: #fff;    
+              height: 100%;
+            overflow-x: hidden !important; /* Prevent side-scroll from sparkles */
             margin: 0;
             padding: 0;
         }
@@ -291,13 +293,10 @@
             text-align: center;
             margin-top: 5px;
             animation: splashIn 2s ease-in-out infinite;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 135px;   /* adjust as needed to place below your logo */
-            z-index: 50; /* above the logo bg but below any modals */
+            /* Remove position, left, right, top, and z-index */
             pointer-events: none;
         }
+
 
         @keyframes splashIn {
             0% {
@@ -321,6 +320,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 999; /* Above everything, but unclickable */
+            overflow: hidden;
             }
 
             .sparkle {
@@ -1193,8 +1193,12 @@
 
             const container = document.getElementById("sparkle-container");
             const size = Math.random() * 6 + 6; // 6–12px
-            const posX = Math.random() * window.innerWidth;
-            const posY = Math.random() * window.innerHeight;
+
+            // Clamp sparkle so it always fits fully in the viewport
+            const maxX = window.innerWidth - size;
+            const maxY = window.innerHeight - size;
+            const posX = Math.random() * maxX;
+            const posY = Math.random() * maxY;
 
             sparkle.style.left = `${posX}px`;
             sparkle.style.top = `${posY}px`;
@@ -1203,16 +1207,11 @@
 
             container.appendChild(sparkle);
 
-            // Remove after animation
+            // Remove after animation (must match animation duration: 1500ms)
             setTimeout(() => {
                 sparkle.remove();
-            }, 1500);
-            }
-
-            // 🧚‍♀️ Sprinkle sparkles every few hundred ms
-            setInterval(() => {
-            createSparkle();
-            }, 300); // Adjust for more or fewer sparkles
+            }, 1500); // <-- was 300 before, now matches your CSS animation!
+        }
 
 
         const splashMessages = [
