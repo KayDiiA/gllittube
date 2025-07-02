@@ -1037,6 +1037,7 @@
         `;
 
         modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // <--- lock scroll!
     }
 
     function closeModal() {
@@ -1050,7 +1051,9 @@
             const newURL = new URL(window.location.href);
             newURL.searchParams.delete('v');
             history.pushState({}, '', newURL);
-        }
+                modal.classList.remove('show');
+            document.body.style.overflow = '';
+          }
 
     
         window.onclick = function (event) {
@@ -1124,8 +1127,11 @@
         }
 
 
-
-
+            function openModal() {
+                document.getElementById('video-modal').classList.add('show');
+                document.body.style.overflow = 'hidden'; // <--- lock scroll!
+            }
+        
 
 
         // 🌗 Dark/Light mode toggle
@@ -1256,6 +1262,7 @@
         "Iroha's Dance Break! 💃",
         "Stanning in style 💅",
         "Cherish My Love ❤️",
+        "Glitter isn't a color, it's a lifestyle ✨",
         "K-Pop never looked this glittery 🌈",
         "ILLIT is love, ILLIT is life 💘",
         "You're a lucky girl!",
