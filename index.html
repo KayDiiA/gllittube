@@ -262,6 +262,31 @@
       #about-modal-content h2 { font-size: 1.13em; }
     }
 
+    /* Icon links */
+    #menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1;
+    }
+
+    #menu li a .icon {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      object-fit: contain;       /* keeps SVG/PNG proportions */
+      filter: drop-shadow(0 0 4px rgba(0,0,0,0.3));
+      transition: transform .18s ease;
+    }
+    #menu li a:hover .icon { transform: translateY(-1px) scale(1.04); }
+
+    /* Optional: tighter on small screens */
+    @media (max-width: 768px) {
+      #menu li { font-size: 20px; }
+      #menu li a .icon { width: 24px; height: 24px; }
+    }
+
+
 
 
   </style>
@@ -287,15 +312,42 @@
     <p id="splash-text">✨ Loading magic...</p>
   </div>
   <div id="divider"></div>
-  <div id="menu">
+
+    <div id="menu">
     <ul>
-      <li><a href="TV.html">🎬 WATCH-IT</a></li>
-      <!-- <li><a href="#">✨ New GLLIT</a></li> -->
-      <li><a href="https://www.illitville.com">🏠 ILLITville</a></li>
-      <li><a href="https://www.reddit.com/r/illit/">🦄 Reddit</a></li>
-      <li><a href="#">📖 About</a></li>
+      <li>
+        <a href="TV.html">
+          <img class="icon" src="assets/icons/watch.png" alt="" aria-hidden="true">
+          <span>WATCH-IT</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.illitville.com">
+          <!-- <img class="icon" src="assets/icons/home.svg" alt="" aria-hidden="true"> -->
+          <span>🏠 ILLITville</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.reddit.com/r/illit/">
+          <img class="icon" src="assets/icons/reddit.png" alt="Reddit">
+          <span>Reddit</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://www.discord.gg/illit" target="_blank" rel="noopener noreferrer">
+          <img class="icon" src="assets/icons/discord.png" alt="Discord">
+          <span>Discord</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="about-link">
+          <!-- <img class="icon" src="assets/icons/info.svg" alt="" aria-hidden="true"> -->
+          <span>📖 About</span>
+        </a>
+      </li>
     </ul>
   </div>
+
 </div>
 
 
@@ -314,8 +366,6 @@
       'negtrQu5mTA',
       'GkG60kISnfc'
     ];
-
-    
 
     //   const videoIds = [
     //   'xRU1XXHIpIc'
@@ -507,7 +557,8 @@
 
       document.addEventListener('DOMContentLoaded', () => {
       // About modal
-      const aboutBtn = document.querySelector("#menu li:last-child a");
+      const aboutBtn = document.getElementById("about-link");
+
       const modal = document.getElementById('about-modal');
       const closeBtn = document.getElementById('about-close');
       aboutBtn.addEventListener('click', (e) => {
