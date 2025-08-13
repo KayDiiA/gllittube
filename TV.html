@@ -139,6 +139,16 @@
            
             overflow: hidden;
         }
+        #logo-container a {
+        display: inline-block;
+        text-decoration: none;
+        }
+        #logo-container a:focus-visible {
+        outline: 2px solid #ff77c6;
+        outline-offset: 4px;
+        border-radius: 8px;
+        }
+
         #site-logo {
             width: 300px;
             height: auto;
@@ -586,16 +596,20 @@
 <body>
     <link rel="icon" type="image/png" href="favicon.png" />
     <div id="logo-container">
-        <img 
-        src="tv.png" 
-        alt="Site Logo" 
-        id="site-logo"
-        data-dark="tv.png"
-        data-light="tv-light.png"
-        />
+        <!-- If your menu is the home page, use "/" or "index.html" -->
+        <a id="home-link" href="index.html" aria-label="Back to menu">
+            <img 
+            src="tv.png" 
+            alt="GLLIT TV Logo – Back to menu" 
+            id="site-logo"
+            data-dark="tv.png"
+            data-light="tv-light.png"
+            />
+        </a>
 
         <p id="logo-caption">Created by u/BigGamingGamer0 (Kay)</p>
-      </div>
+        </div>
+
 
       <p id="splash-text">✨ Loading magic...</p>
 
@@ -622,7 +636,7 @@
       </div>
       
       <div id="top-link">
-        <a href="https://illitville.com" target="_blank">Check out ILLITville</a>
+        <a href="https://www.discord.gg/illit" target="_blank">Join the ILLIT Discord!</a>
         
       </div>
       <div id="theme-toggle-container" style="text-align: center; margin-top: 10px;">
@@ -1262,7 +1276,6 @@
         "Iroha's Dance Break! 💃",
         "Stanning in style 💅",
         "Cherish My Love ❤️",
-        "Glitter isn't a color, it's a lifestyle ✨",
         "K-Pop never looked this glittery 🌈",
         "ILLIT is love, ILLIT is life 💘",
         "You're a lucky girl!",
